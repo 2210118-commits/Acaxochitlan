@@ -4,6 +4,9 @@ workflows:
 
     max_build_duration: 60
 
+    integrations:
+      app_store_connect: Codemagic
+
     environment:
       flutter: stable
       xcode: latest
@@ -12,26 +15,31 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.acaxochi.turismo
 
-    integrations:
-      app_store_connect: Codemagic
-
     scripts:
       - name: Get Flutter packages
         script: |
+          flutter clean
           flutter pub get
 
       - name: Install CocoaPods
         script: |
-          cd ios && pod install
+          cd ios
+          pod install
+          cd ..
 
       - name: Set up code signing
         script: |
           xcode-project use-profiles
 
-      - name: Build IPA
+      - name: Build signed IPA
         script: |
-          flutter build ipa --release \
-            --export-options-plist=/Users/builder/export_options.plist
+          flutter build ipa --release
+
+      - name: Verify IPA
+        script: |
+          find build/ios -name "*.ipa"
 
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/ios/archive/*.ipa
+      - build/ios/**/*.ipa
