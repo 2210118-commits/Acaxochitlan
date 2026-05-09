@@ -1,11 +1,8 @@
 workflows:
   ios-release:
-    name: iOS Release Build
+    name: iOS IPA Release
 
     max_build_duration: 60
-
-    integrations:
-      app_store_connect: Codemagic
 
     environment:
       flutter: stable
@@ -15,14 +12,26 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.acaxochi.turismo
 
+    integrations:
+      app_store_connect: Codemagic
+
     scripts:
-      - name: Flutter packages
+      - name: Get Flutter packages
         script: |
           flutter pub get
 
+      - name: Install CocoaPods
+        script: |
+          cd ios && pod install
+
+      - name: Set up code signing
+        script: |
+          xcode-project use-profiles
+
       - name: Build IPA
         script: |
-          flutter build ipa --release
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
       - build/ios/ipa/*.ipa
