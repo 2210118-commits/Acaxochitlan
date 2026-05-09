@@ -1,19 +1,43 @@
 workflows:
   ios-release:
     name: iOS Release Build
+
     max_build_duration: 60
+
+    integrations:
+      app_store_connect: Codemagic
 
     environment:
       flutter: stable
       xcode: latest
 
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.acaxochi.turismo
+
     scripts:
-      - name: Get Flutter packages
-        script: flutter pub get
+      - name: Flutter packages
+        script: |
+          flutter pub get
+
+      - name: Build iOS without codesign
+        script: |
+          flutter build ios --release --no-codesign
 
       - name: Build IPA
         script: |
-          flutter build ipa --release
+          xcode-project use-profiles
+
+          xcodebuild -workspace ios/Runner.xcworkspace \
+                     -scheme Runner \
+                     -sdk iphoneos \
+                     -configuration Release \
+                     -archivePath build/ios/archive/Runner.xcarchive archive
+
+          xcodebuild -exportArchive \
+                     -archivePath build/ios/archive/Runner.xcarchive \
+                     -exportOptionsPlist /Users/builder/export_options.plist \
+                     -exportPath build/ios/ipa
 
     artifacts:
       - build/ios/ipa/*.ipa
