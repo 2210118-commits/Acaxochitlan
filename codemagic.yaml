@@ -20,24 +20,9 @@ workflows:
         script: |
           flutter pub get
 
-      - name: Build iOS without codesign
-        script: |
-          flutter build ios --release --no-codesign
-
       - name: Build IPA
         script: |
-          xcode-project use-profiles
-
-          xcodebuild -workspace ios/Runner.xcworkspace \
-                     -scheme Runner \
-                     -sdk iphoneos \
-                     -configuration Release \
-                     -archivePath build/ios/archive/Runner.xcarchive archive
-
-          xcodebuild -exportArchive \
-                     -archivePath build/ios/archive/Runner.xcarchive \
-                     -exportOptionsPlist /Users/builder/export_options.plist \
-                     -exportPath build/ios/ipa
+          flutter build ipa --release
 
     artifacts:
       - build/ios/ipa/*.ipa
