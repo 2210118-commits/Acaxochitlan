@@ -11,6 +11,9 @@ workflows:
       flutter: stable
       xcode: latest
 
+      vars:
+        BUNDLE_ID: "com.acaxochi.turismo"
+
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.acaxochi.turismo
@@ -33,13 +36,7 @@ workflows:
 
       - name: Build IPA
         script: |
-          flutter build ipa \
-            --release \
-            --export-method app-store
-
-      - name: Check IPA
-        script: |
-          ls -R build/ios/ipa/
+          flutter build ipa --release --export-method app-store
 
     artifacts:
       - build/ios/ipa/*.ipa
