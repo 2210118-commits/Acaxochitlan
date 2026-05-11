@@ -30,21 +30,15 @@ workflows:
           pod install
           cd ..
 
-      - name: Fetch signing files
+      - name: Set up automatic code signing
         script: |
-          app-store-connect fetch-signing-files com.acaxochi.turismo \
-            --type IOS_APP_STORE \
-            --create
-
-          keychain initialize
-
           xcode-project use-profiles
 
       - name: Build signed IPA
         script: |
           flutter build ipa \
             --release \
-            --export-options-plist=/Users/builder/export_options.plist
+            --export-method app-store
 
     artifacts:
       - build/ios/ipa/*.ipa
