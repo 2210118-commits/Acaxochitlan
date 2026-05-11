@@ -16,30 +16,30 @@ workflows:
         bundle_identifier: com.acaxochi.turismo
 
     scripts:
-      - name: Get Flutter packages
+      - name: Clean & packages
         script: |
           flutter clean
           flutter pub get
 
-      - name: Install CocoaPods
+      - name: Install pods
         script: |
           cd ios
           pod install
           cd ..
 
-      - name: Set up code signing
+      - name: Set up signing
         script: |
           xcode-project use-profiles
 
-      - name: Build signed IPA
+      - name: Build IPA
         script: |
-          flutter build ipa --release
+          flutter build ipa \
+            --release \
+            --export-method app-store
 
-      - name: Verify IPA
+      - name: Check IPA
         script: |
-          find build/ios -name "*.ipa"
+          ls -R build/ios/ipa/
 
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/ios/archive/*.ipa
-      - build/ios/**/*.ipa
