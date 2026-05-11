@@ -4,9 +4,6 @@ workflows:
 
     max_build_duration: 60
 
-    integrations:
-      app_store_connect: Codemagic
-
     environment:
       flutter: stable
       xcode: latest
