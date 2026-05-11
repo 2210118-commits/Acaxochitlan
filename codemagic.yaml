@@ -30,22 +30,17 @@ workflows:
           pod install
           cd ..
 
-      - name: Configure code signing
+      - name: Set up automatic code signing
         script: |
           xcode-project use-profiles
 
-      - name: Build Flutter iOS without signing
+      - name: Build signed IPA
         script: |
           flutter build ipa \
             --release \
-            --export-method app-store \
-            --no-codesign
-
-      - name: Export signed IPA
-        script: |
-          xcode-project build-ipa \
-            --workspace ios/Runner.xcworkspace \
-            --scheme Runner
+            --export-method app-store
 
     artifacts:
       - build/ios/ipa/*.ipa
+
+  
