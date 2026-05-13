@@ -4,77 +4,58 @@
 <dict>
 
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Necesitamos acceso a tu galería para subir imágenes y videos</string>
-
+<string>Necesitamos acceso a tu galería para subir imágenes y videos</string>
     <key>NSCameraUsageDescription</key>
-    <string>Necesitamos acceso a la cámara para tomar fotos</string>
-
+<string>Necesitamos acceso a la cámara para tomar fotos</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>Necesitamos guardar imágenes en tu galería</string>
+<string>Necesitamos guardar imágenes en tu galería</string>
 
-    <!-- AGREGAR ESTO EXACTAMENTE AQUÍ -->
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Necesitamos acceder a tu ubicación para mostrar lugares turísticos cercanos y mejorar tu experiencia en el mapa.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Necesitamos acceder a tu ubicación para mostrar lugares turísticos cercanos y mejorar tu experiencia en el mapa.</string>
 
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>Necesitamos acceder a tu ubicación para mostrar lugares turísticos cercanos y mejorar tu experiencia en el mapa.</string>
-    <!-- HASTA AQUÍ -->
-
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Necesitamos acceder a tu ubicación para mostrar lugares turísticos cercanos y mejorar tu experiencia en el mapa.</string>
+    
+	
 	<key>UIFileSharingEnabled</key>
     <true/>
-
 	<key>LSApplicationQueriesSchemes</key>
     <array>
         <string>http</string>
         <string>https</string>
     </array>
-
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
-
 	<key>CFBundleDisplayName</key>
 	<string>Acaxochitlán Travel</string>
-
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
-
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
-
 	<key>CFBundleName</key>
 	<string>acaxochi</string>
-
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
-
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
-
 	<key>CFBundleSignature</key>
 	<string>????</string>
-
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
-
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
-
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -82,12 +63,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-
 </dict>
 </plist>
