@@ -50,7 +50,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔥 WINDOWS
+  // WINDOWS
   if (Platform.isWindows) {
     try {
       await SupabaseConfig.initialize();
@@ -63,7 +63,7 @@ void main() async {
     return;
   }
 
-  // 🔥 ANDROID / iOS
+  // FIREBASE separado
   try {
     await Firebase.initializeApp();
 
@@ -84,11 +84,17 @@ void main() async {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    await SupabaseConfig.initialize();
-
-    print("✅ Firebase + Supabase iniciado");
+    print("✅ Firebase iniciado");
   } catch (e) {
-    print("❌ Error inicializando servicios: $e");
+    print("❌ Firebase error: $e");
+  }
+
+  // SUPABASE separado
+  try {
+    await SupabaseConfig.initialize();
+    print("✅ Supabase iniciado");
+  } catch (e) {
+    print("❌ Supabase error: $e");
   }
 
   runApp(const TurismoApp());
