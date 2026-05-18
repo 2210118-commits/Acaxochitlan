@@ -62,13 +62,14 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 
-	<!-- SOLO ORIENTACIÓN IPHONE -->
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
+	<!-- ORIENTACIONES SOPORTADAS -->
+<key>UISupportedInterfaceOrientations</key>
+<array>
+	<string>UIInterfaceOrientationPortrait</string>
+	<string>UIInterfaceOrientationPortraitUpsideDown</string>
+	<string>UIInterfaceOrientationLandscapeLeft</string>
+	<string>UIInterfaceOrientationLandscapeRight</string>
+</array>
 
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
