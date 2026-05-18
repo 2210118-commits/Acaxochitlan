@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'lugares_detalle_por_tipo_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'EditarLugarPage.dart';
+import 'favoritos_service.dart';
 
 class LugaresPorTipoPage extends StatefulWidget {
   final String tipo; // 'hotel' o 'cabana'
@@ -317,6 +318,36 @@ Align(
               ),
             ],
           ),
+          Positioned(
+  top: 10,
+  left: 10,
+  child: FutureBuilder<bool>(
+    future: FavoritosService.esFavorito(l['id'].toString()),
+    builder: (context, snapshot) {
+      final favorito = snapshot.data ?? false;
+
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.95),
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+          icon: Icon(
+            favorito ? Icons.favorite : Icons.favorite_border,
+            color: Colors.red,
+          ),
+          onPressed: () async {
+            await FavoritosService.toggleFavorito(
+              l['id'].toString(),
+            );
+
+            setState(() {});
+          },
+        ),
+      );
+    },
+  ),
+),
 
           /// 🔥 BOTONES ADMIN
           if (isAdmin)

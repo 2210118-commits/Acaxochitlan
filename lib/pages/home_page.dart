@@ -15,6 +15,7 @@ import 'tienda_hidarte_page.dart';
 import 'servicios_emergencia_page.dart';
 //import para la busqueda
 import 'lugar_card.dart';
+import 'FavoritosPage.dart';
 
 
 
@@ -496,61 +497,84 @@ if (esAdmin) ...[
 ),
 
   actions: [
-    Stack(
-      children: [
-        IconButton(
-          icon: const Icon(
-            Icons.notifications,
-            color: Colors.white,
-            size: 28,
-          ),
-          onPressed: () {
-
-  setState(() {
-    pausarVideoHome = true;
-  });
-
-  Navigator.pushNamed(context, '/notificaciones')
-      .then((_) {
-
-    setState(() {
-      pausarVideoHome = false;
-    });
-
-    cargarNotificaciones();
-
-  });
-},
+  // 🔔 NOTIFICACIONES
+  Stack(
+    children: [
+      IconButton(
+        icon: const Icon(
+          Icons.notifications,
+          color: Colors.white,
+          size: 28,
         ),
+        onPressed: () {
+          setState(() {
+            pausarVideoHome = true;
+          });
 
-        if (notificacionesCount > 0)
-          Positioned(
-            right: 6,
-            top: 6,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
+          Navigator.pushNamed(context, '/notificaciones')
+              .then((_) {
+            setState(() {
+              pausarVideoHome = false;
+            });
+
+            cargarNotificaciones();
+          });
+        },
+      ),
+
+      if (notificacionesCount > 0)
+        Positioned(
+          right: 6,
+          top: 6,
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: const BoxDecoration(
+              color: Colors.red,
+              shape: BoxShape.circle,
+            ),
+            constraints: const BoxConstraints(
+              minWidth: 18,
+              minHeight: 18,
+            ),
+            child: Text(
+              '$notificacionesCount',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
               ),
-              constraints: const BoxConstraints(
-                minWidth: 18,
-                minHeight: 18,
-              ),
-              child: Text(
-                '$notificacionesCount',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
+              textAlign: TextAlign.center,
             ),
           ),
-      ],
+        ),
+    ],
+  ),
+
+  // ❤️ FAVORITOS
+  IconButton(
+    icon: const Icon(
+      Icons.favorite,
+      color: Colors.white,
+      size: 28,
     ),
-  ],
+    onPressed: () {
+      setState(() {
+        pausarVideoHome = true;
+      });
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const FavoritosPage(),
+        ),
+      ).then((_) {
+        setState(() {
+          pausarVideoHome = false;
+        });
+      });
+    },
+  ),
+],
 ),
 
       body: Stack(

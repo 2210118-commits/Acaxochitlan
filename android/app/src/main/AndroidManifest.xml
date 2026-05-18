@@ -22,7 +22,7 @@
     </queries>
 
     <application
-        android:label="Acaxochitlan Travel"
+        android:label="Vive Acaxochitlán"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
