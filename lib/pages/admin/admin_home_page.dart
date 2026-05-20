@@ -221,6 +221,13 @@ _adminCard(
   color: Colors.indigo,
   route: '/cambiar_fondo_home',
 ),
+_adminCard(
+  context,
+  icon: Icons.newspaper,
+  title: "Subir Noticias",
+  color: Colors.deepPurple,
+  route: '/admin_noticias',
+),
                 ],
               ),
             ),

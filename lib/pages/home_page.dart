@@ -13,11 +13,13 @@ import '../utils/buscador_global.dart';
 import '../main.dart';
 import 'tienda_hidarte_page.dart';
 import 'servicios_emergencia_page.dart';
+import 'cerca_de_mi_page.dart';
+import 'package:geolocator/geolocator.dart';
+import '../utils/ubicacion_helper.dart';
+import 'noticias_home_section.dart';
 //import para la busqueda
 import 'lugar_card.dart';
 import 'FavoritosPage.dart';
-
-
 
 
 class HomePage extends StatefulWidget {
@@ -238,8 +240,8 @@ Future<void> cargarNotificaciones() async {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.black.withOpacity(0.55),
-              Colors.black.withOpacity(0.25),
+              Colors.black.withOpacity(0.60),
+              Colors.black.withOpacity(0.30),
             ],
             begin: Alignment.bottomLeft,
             end: Alignment.topRight,
@@ -723,46 +725,112 @@ if (_searchController.text.trim().isNotEmpty && resultadosBusqueda.isNotEmpty)
 
 
 
-                    ElevatedButton.icon(
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.orangeAccent,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(25),
-    ),
-    padding: const EdgeInsets.symmetric(
-      horizontal: 30,
-      vertical: 12,
-    ),
-  ),
-  icon: const Icon(Icons.celebration, color: Colors.white),
-  label: const Text(
-    "Ver Festividades",
-    style: TextStyle(
-      color: Colors.white,
-      fontSize: 16,
-      fontWeight: FontWeight.bold,
-    ),
-  ),
-  onPressed: () {
+                    Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
 
-    setState(() {
-      pausarVideoHome = true;
-    });
+    /// FESTIVIDADES
+    Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 20, right: 8),
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.orangeAccent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: const EdgeInsets.symmetric(
+              vertical: 14,
+            ),
+          ),
+          icon: const Icon(
+            Icons.celebration,
+            color: Colors.white,
+          ),
+          label: const Text(
+            "Festividades",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onPressed: () {
+            setState(() {
+              pausarVideoHome = true;
+            });
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const FestividadesPage(),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const FestividadesPage(),
+              ),
+            ).then((_) {
+              setState(() {
+                pausarVideoHome = false;
+              });
+            });
+          },
+        ),
       ),
-    ).then((_) {
+    ),
 
-      setState(() {
-        pausarVideoHome = false;
-      });
+    /// CERCA DE MI
+    Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8, right: 20),
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueAccent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: const EdgeInsets.symmetric(
+              vertical: 14,
+            ),
+          ),
+          icon: const Icon(
+            Icons.my_location,
+            color: Colors.white,
+          ),
+          label: const Text(
+            "Cerca de mí",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onPressed: () async {
+  final permitido =
+      await UbicacionHelper
+          .solicitarPermisoUbicacion(
+    context,
+  );
 
-    });
+  if (!permitido) return;
 
-  },
+  if (!mounted) return;
+
+  setState(() {
+    pausarVideoHome = true;
+  });
+
+  await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const CercaDeMiPage(),
+    ),
+  );
+
+  if (!mounted) return;
+
+  setState(() {
+    pausarVideoHome = false;
+  });
+},
+        ),
+      ),
+    ),
+  ],
 ),
 
                     const SizedBox(height: 80),
@@ -790,8 +858,12 @@ if (_searchController.text.trim().isNotEmpty && resultadosBusqueda.isNotEmpty)
                           ),
                       ],
                     ),
-
                     const SizedBox(height: 30),
+
+                    const NoticiasHomeSection(),
+
+                    const SizedBox(height: 15),
+                    
                   ],
                 ),
               ),

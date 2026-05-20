@@ -27,6 +27,7 @@ import 'pages/subir_imagen_carrucel_page.dart';
 import 'pages/HotelesCabanasPage.dart';
 import 'pages/admin/admin_servicios_emergencia_page.dart';
 import 'pages/subir_tienda_hidarte_page.dart';
+import 'pages/admin/admin_noticias_page.dart';
 
 // 🔥 FIREBASE
 import 'package:firebase_core/firebase_core.dart';
@@ -269,6 +270,7 @@ class _TurismoAppState extends State<TurismoApp> {
             const SubirTiendaHidartePage(),
         '/cambiar_fondo_home': (context) =>
             const AdminFondoHomePage(),
+        '/admin_noticias': (_) => const AdminNoticiasPage(),
       },
     );
   }
