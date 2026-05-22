@@ -15,7 +15,9 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Necesitamos acceder a tu ubicación para mostrar lugares turísticos cercanos y mejorar tu experiencia en el mapa.</string>
 
-	
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Necesitamos acceder a tu ubicación para mostrar lugares turísticos cercanos y mejorar tu experiencia en el mapa.</string>
+
 	<key>UIFileSharingEnabled</key>
 	<true/>
 
