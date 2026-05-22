@@ -156,22 +156,48 @@ class _VideoFullscreenPageState
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: _chewieController == null
-          ? const Center(
-              child: CircularProgressIndicator(
-                color: Color.fromARGB(255, 222, 201, 236),
-              ),
-            )
-          : SafeArea(
-              child: Center(
-                child: Chewie(
-                  controller: _chewieController!,
-                ),
-              ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: _chewieController == null
+        ? const Center(
+            child: CircularProgressIndicator(
+              color: Color.fromARGB(255, 222, 201, 236),
             ),
-    );
-  }
+          )
+        : SafeArea(
+            child: Stack(
+              children: [
+                Center(
+                  child: Chewie(
+                    controller: _chewieController!,
+                  ),
+                ),
+
+                // Botón para salir
+                Positioned(
+                  top: 15,
+                  left: 15,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.close, // cambia por Icons.arrow_back si prefieres flecha
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+  );
+}
 }

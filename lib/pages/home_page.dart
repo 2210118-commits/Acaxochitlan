@@ -802,9 +802,7 @@ if (_searchController.text.trim().isNotEmpty && resultadosBusqueda.isNotEmpty)
           onPressed: () async {
   final permitido =
       await UbicacionHelper
-          .solicitarPermisoUbicacion(
-    context,
-  );
+          .solicitarPermisoUbicacion();
 
   if (!permitido) return;
 

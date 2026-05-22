@@ -28,6 +28,8 @@ import 'pages/HotelesCabanasPage.dart';
 import 'pages/admin/admin_servicios_emergencia_page.dart';
 import 'pages/subir_tienda_hidarte_page.dart';
 import 'pages/admin/admin_noticias_page.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'pages/no_internet_page.dart';
 
 // 🔥 FIREBASE
 import 'package:firebase_core/firebase_core.dart';
@@ -207,7 +209,35 @@ class _TurismoAppState extends State<TurismoApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
 
-      home: const HomePage(),
+      home: FutureBuilder<List<ConnectivityResult>>(
+  future: Connectivity().checkConnectivity(),
+  builder: (context, snapshot) {
+    if (!snapshot.hasData) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    final resultados = snapshot.data!;
+
+    final conectado =
+        resultados.contains(
+          ConnectivityResult.wifi,
+        ) ||
+        resultados.contains(
+          ConnectivityResult.mobile,
+        ) ||
+        resultados.contains(
+          ConnectivityResult.ethernet,
+        );
+
+    return conectado
+        ? const HomePage()
+        : const NoInternetPage();
+  },
+),
 
       navigatorObservers: [routeObserver],
 
