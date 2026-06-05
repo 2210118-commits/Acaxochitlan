@@ -196,7 +196,7 @@ class _NoticiasHomeSectionState
     ),
     decoration: BoxDecoration(
       color: const Color(0xFF7A003C),
-      borderRadius: BorderRadius.circular(30),
+      borderRadius: BorderRadius.circular(20),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.20),
@@ -206,9 +206,9 @@ class _NoticiasHomeSectionState
       ],
     ),
     child: const Text(
-      "Noticias",
+      "LUGARES MAGICOS",
       style: TextStyle(
-        fontSize: 24,
+        fontSize: 16,
         fontWeight: FontWeight.bold,
         color: Colors.white,
         letterSpacing: 0.5,

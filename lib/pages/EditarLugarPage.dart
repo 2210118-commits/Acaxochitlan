@@ -32,6 +32,9 @@ class _EditarLugarPageState extends State<EditarLugarPage> {
 final recamaraPrecioCtrl = TextEditingController();
   final platilloNombreCtrl = TextEditingController();
 final platilloPrecioCtrl = TextEditingController();
+final whatsappCtrl = TextEditingController();
+final horarioCtrl = TextEditingController();
+
 
 File? platilloImagen;
 File? recamaraImagen;
@@ -94,6 +97,8 @@ String? obtenerYoutubeId(String url) {
     telefonoCtrl.text = l['telefono'] ?? '';
     webCtrl.text = l['pagina_web'] ?? '';
     facebookCtrl.text = l['facebook'] ?? '';
+    whatsappCtrl.text = l['whatsapp'] ?? '';
+    horarioCtrl.text = l['horario'] ?? '';
     latCtrl.text = l['latitud']?.toString() ?? '';
     lngCtrl.text = l['longitud']?.toString() ?? '';
 
@@ -299,14 +304,14 @@ Future<void> agregarVideoDesdeTelefono() async {
 
 
 Future<void> agregarRecamara() async {
-  if (recamaraNombreCtrl.text.trim().isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('El nombre de la recámara es obligatorio'),
-      ),
-    );
-    return;
-  }
+  if (recamaraImagen == null) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Debes seleccionar una imagen'),
+    ),
+  );
+  return;
+}
 
   String? imagenUrl;
 
@@ -316,12 +321,14 @@ Future<void> agregarRecamara() async {
 
   setState(() {
     recamaras.add({
-      'nombre': recamaraNombreCtrl.text.trim(),
-      'precio': recamaraPrecioCtrl.text.trim().isEmpty
-          ? null
-          : recamaraPrecioCtrl.text.trim(),
-      'imagen': imagenUrl,
-    });
+  'nombre': recamaraNombreCtrl.text.trim().isEmpty
+      ? null
+      : recamaraNombreCtrl.text.trim(),
+  'precio': recamaraPrecioCtrl.text.trim().isEmpty
+      ? null
+      : recamaraPrecioCtrl.text.trim(),
+  'imagen': imagenUrl,
+});
 
     recamaraNombreCtrl.clear();
     recamaraPrecioCtrl.clear();
@@ -330,14 +337,14 @@ Future<void> agregarRecamara() async {
 }
 
 Future<void> agregarPlatillo() async {
-  if (platilloNombreCtrl.text.trim().isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('El nombre del platillo es obligatorio'),
-      ),
-    );
-    return;
-  }
+  if (platilloImagen == null) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Debes seleccionar una imagen'),
+    ),
+  );
+  return;
+}
 
   String? imagenUrl;
 
@@ -347,7 +354,9 @@ Future<void> agregarPlatillo() async {
 
   setState(() {
     platillos.add({
-  'nombre': platilloNombreCtrl.text.trim(),
+  'nombre': platilloNombreCtrl.text.trim().isEmpty
+      ? null
+      : platilloNombreCtrl.text.trim(),
   'precio': platilloPrecioCtrl.text.trim().isEmpty
       ? null
       : platilloPrecioCtrl.text.trim(),
@@ -424,8 +433,10 @@ Future<void> eliminarLogo() async {
     ? null
     : precioCtrl.text.trim(),
             'telefono': telefonoCtrl.text.trim(),
+            'whatsapp': whatsappCtrl.text.trim(),
             'pagina_web': webCtrl.text.trim(),
             'facebook': facebookCtrl.text.trim(),
+            'horario': horarioCtrl.text.trim(),
             'latitud': latCtrl.text.isNotEmpty
                 ? double.parse(latCtrl.text)
                 : null,
@@ -563,6 +574,40 @@ Widget _campoEditable(
 },
             ),
             const SizedBox(height: 15),
+            const SizedBox(height: 15),
+
+DropdownButtonFormField<String>(
+  value: tipoSeleccionado,
+  decoration: const InputDecoration(
+    labelText: 'Tipo',
+    border: OutlineInputBorder(),
+  ),
+  items: const [
+    DropdownMenuItem(
+      value: 'hotel',
+      child: Text('Hotel'),
+    ),
+    DropdownMenuItem(
+      value: 'cabana',
+      child: Text('Cabaña'),
+    ),
+    DropdownMenuItem(
+      value: 'lugar_turistico',
+      child: Text('Lugar turístico'),
+    ),
+    DropdownMenuItem(
+      value: 'restaurante',
+      child: Text('Restaurante'),
+    ),
+  ],
+  onChanged: (value) {
+    setState(() {
+      tipoSeleccionado = value!;
+    });
+  },
+),
+
+const SizedBox(height: 15),
             TextFormField(
               controller: descripcionCtrl,
               maxLines: 3,
@@ -1077,6 +1122,19 @@ _campoEditable(
   'Facebook',
   icono: Icons.facebook,
   tipo: TextInputType.url,
+),
+
+_campoEditable(
+  whatsappCtrl,
+  'WhatsApp',
+  icono: Icons.chat,
+  tipo: TextInputType.phone,
+),
+
+_campoEditable(
+  horarioCtrl,
+  'Horario',
+  icono: Icons.access_time,
 ),
 
 const SizedBox(height: 30),

@@ -23,6 +23,9 @@ class _EditarNoticiaPageState
 
   late TextEditingController tituloController;
   late TextEditingController descripcionController;
+  late TextEditingController ubicacionController;
+late TextEditingController latitudController;
+late TextEditingController longitudController;
 
   String categoriaSeleccionada = 'Noticias';
 
@@ -52,6 +55,21 @@ class _EditarNoticiaPageState
       text:
           widget.noticia['descripcion'] ?? '',
     );
+
+    ubicacionController =
+    TextEditingController(
+  text: widget.noticia['ubicacion'] ?? '',
+);
+
+latitudController =
+    TextEditingController(
+  text: widget.noticia['latitud']?.toString() ?? '',
+);
+
+longitudController =
+    TextEditingController(
+  text: widget.noticia['longitud']?.toString() ?? '',
+);
 
     categoriaSeleccionada =
         widget.noticia['categoria'] ??
@@ -288,19 +306,22 @@ class _EditarNoticiaPageState
       ];
 
       await supabase
-          .from('noticias')
-          .update({
-            'titulo':
-                tituloController.text.trim(),
-            'descripcion':
-                descripcionController.text
-                    .trim(),
-            'categoria':
-                categoriaSeleccionada,
-            'imagen': imagenPrincipal,
-            'galeria': galeriaFinal,
-            'videos': videosFinal,
-          })
+    .from('noticias')
+    .update({
+      'titulo': tituloController.text.trim(),
+      'descripcion':
+          descripcionController.text.trim(),
+      'categoria': categoriaSeleccionada,
+      'ubicacion':
+          ubicacionController.text.trim(),
+      'latitud': double.tryParse(
+          latitudController.text.trim()),
+      'longitud': double.tryParse(
+          longitudController.text.trim()),
+      'imagen': imagenPrincipal,
+      'galeria': galeriaFinal,
+      'videos': videosFinal,
+    })
           .eq('id', widget.noticia['id']);
 
       if (!mounted) return;
@@ -606,6 +627,41 @@ class _EditarNoticiaPageState
 
             const SizedBox(height: 30),
 
+TextField(
+  controller: ubicacionController,
+  maxLines: 3,
+  decoration: const InputDecoration(
+    labelText: '¿Cómo llegar?',
+    prefixIcon: Icon(Icons.location_on),
+  ),
+),
+
+const SizedBox(height: 20),
+
+TextField(
+  controller: latitudController,
+  keyboardType: const TextInputType.numberWithOptions(
+    decimal: true,
+  ),
+  decoration: const InputDecoration(
+    labelText: 'Latitud',
+    prefixIcon: Icon(Icons.map),
+  ),
+),
+
+const SizedBox(height: 20),
+
+TextField(
+  controller: longitudController,
+  keyboardType: const TextInputType.numberWithOptions(
+    decimal: true,
+  ),
+  decoration: const InputDecoration(
+    labelText: 'Longitud',
+    prefixIcon: Icon(Icons.map_outlined),
+  ),
+),
+
             /// VIDEOS
             const Text(
               'Videos',
@@ -724,6 +780,14 @@ class _EditarNoticiaPageState
                   child:
                       Text('Avisos'),
                 ),
+                DropdownMenuItem(
+                  value: 'Atractivos Turísticos',
+                  child: Text('Atractivos Turísticos'),
+                ),
+                DropdownMenuItem(
+  value: 'Ver más',
+  child: Text('Ver más'),
+),
               ],
               onChanged: (value) {
                 setState(() {

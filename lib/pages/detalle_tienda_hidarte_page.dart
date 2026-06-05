@@ -115,7 +115,7 @@ final lng = producto['longitud'];
                 Text(
                   producto['nombre'] ?? '',
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -127,7 +127,7 @@ final lng = producto['longitud'];
                   TextoExpandable(
                     texto: producto['descripcion'],
                     maxLineas: 4,
-                    fontSize: 16,
+                    fontSize: 12,
                   ),
 
                 const SizedBox(height: 20),
@@ -148,7 +148,6 @@ final lng = producto['longitud'];
                 const SizedBox(height: 20),
 
                 /// 🖼️ GALERÍA
-                /// 🖼️ GALERÍA PRO 🔥
 if (galeria.isNotEmpty) ...[
   const Text(
     'Galería',
@@ -296,78 +295,115 @@ if (videos.isNotEmpty) ...[
     ),
 ],
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 /// 🛍️ PRODUCTOS
-                if (productos.isNotEmpty) ...[
-                  const Text(
-                    'Productos',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: productos.map<Widget>((p) {
-                      final img = _fixImageUrl(p['imagen']);
-
-                      return SizedBox(
-                        width: 150,
-                        child: Card(
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Column(
-                              children: [
-                                if (img.isNotEmpty)
-  GestureDetector(
-    onTap: () => ImageViewerHelper.abrir(
-      context,
-      images: [img],
-      initialIndex: 0,
-    ),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: Image.network(
-        img,
-        height: 100,
-        width: double.infinity,
-        fit: BoxFit.cover,
-      ),
+if (productos.isNotEmpty) ...[
+  const Text(
+    'Productos',
+    style: TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
     ),
   ),
 
-                                const SizedBox(height: 5),
+  const SizedBox(height: 10),
 
-                                Text(
-                                  p['nombre'] ?? '',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                ),
+  GridView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    itemCount: productos.length,
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 3,
+      crossAxisSpacing: 3,
+      mainAxisSpacing: 3,
+      childAspectRatio: 0.72,
+    ),
+    itemBuilder: (context, index) {
+      final p = productos[index];
+      final img = _fixImageUrl(p['imagen']);
 
-                                if (p['precio'] != null)
-                                  Text(
-                                    '\$${p['precio']}',
-                                    style: const TextStyle(
-                                        color: Colors.green),
-                                  ),
-                              ],
-                            ),
+      return GestureDetector(
+        onTap: () {
+          if (img.isNotEmpty) {
+            ImageViewerHelper.abrir(
+              context,
+              images: [img],
+              initialIndex: 0,
+            );
+          }
+        },
+        child: Card(
+          elevation: 1,
+          shadowColor: Colors.black12,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+
+              Expanded(
+                flex: 7,
+                child: img.isNotEmpty
+                    ? Image.network(
+                        img,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        filterQuality: FilterQuality.high,
+                      )
+                    : Container(
+                        color: Colors.grey.shade200,
+                        child: const Center(
+                          child: Icon(Icons.image_outlined),
+                        ),
+                      ),
+              ),
+
+              Expanded(
+                flex: 3,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 3,
+                    vertical: 2,
+                  ),
+                  child: Column(
+                    mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
+                    children: [
+
+                      Text(
+                        p['nombre'] ?? '',
+                        textAlign: TextAlign.center,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          height: 1.2,
+                        ),
+                      ),
+
+                      if (p['precio'] != null)
+                        Text(
+                          '\$${p['precio']}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
                           ),
                         ),
-                      );
-                    }).toList(),
+                    ],
                   ),
-                ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  ),
+],
 
                 const SizedBox(height: 30),
 
@@ -420,7 +456,7 @@ if (paginaWeb.isNotEmpty ||
 
 ],      
                 
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
           
 if (lat != null && lng != null && lat != 0 && lng != 0) ...[

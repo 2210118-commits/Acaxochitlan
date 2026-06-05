@@ -36,6 +36,7 @@ void initState() {
         .from('lugares')
         .select()
         .eq('tipo', widget.tipo)
+        .order('orden', ascending: true, nullsFirst: false)
         .order('created_at', ascending: false);
 
     return response;
@@ -92,6 +93,59 @@ void initState() {
       SnackBar(content: Text('Error al eliminar: $e')),
     );
   }
+}
+Future<void> _cambiarOrden(
+  Map<String, dynamic> lugar,
+) async {
+  int? nuevoOrden;
+
+  await showDialog(
+    context: context,
+    builder: (_) {
+      return AlertDialog(
+        title: Text(
+          'Orden de ${lugar['nombre']}',
+        ),
+        content: DropdownButtonFormField<int>(
+          items: List.generate(
+            70,
+            (i) => DropdownMenuItem(
+              value: i + 1,
+              child: Text('Posición ${i + 1}'),
+            ),
+          ),
+          onChanged: (v) {
+            nuevoOrden = v;
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (nuevoOrden != null) {
+                await Supabase.instance.client
+                    .from('lugares')
+                    .update({
+                      'orden': nuevoOrden,
+                    })
+                    .eq('id', lugar['id']);
+              }
+
+              Navigator.pop(context);
+
+              setState(() {
+                _future = _cargarLugares();
+              });
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
+      );
+    },
+  );
 }
 Future<void> _eliminarArchivosStorage(Map<String, dynamic> lugar) async {
   final storage = Supabase.instance.client.storage.from('hoteles_cabanas');
@@ -273,15 +327,16 @@ return ListView.builder(
                     const SizedBox(height: 10),
 
                     /// PRECIO
-                    if (l['precio'] != null)
-                      Text(
-                        '\$${l['precio']}',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.green,
-                        ),
-                      ),
+                    if (l['precio'] != null &&
+    l['precio'].toString().trim().isNotEmpty)
+  Text(
+    l['precio'].toString(),
+    style: const TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w700,
+      color: Colors.green,
+    ),
+  ),
 
                     const SizedBox(height: 14),
 
@@ -420,6 +475,22 @@ Align(
                       },
                     ),
                   ),
+
+                  Container(
+  decoration: BoxDecoration(
+    color: Colors.white.withOpacity(0.95),
+    shape: BoxShape.circle,
+  ),
+  child: IconButton(
+    icon: const Icon(
+      Icons.format_list_numbered,
+      color: Colors.orange,
+    ),
+    onPressed: () {
+      _cambiarOrden(l);
+    },
+  ),
+),
                 ],
               ),
             ),

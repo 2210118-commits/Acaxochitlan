@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../tienda_hidarte_page.dart';
 import '../servicios_emergencia_page.dart';
+import 'admin_experiencia_magica_page.dart';
 
 class AdminHomePage extends StatelessWidget {
   const AdminHomePage({super.key});
@@ -227,6 +228,14 @@ _adminCard(
   title: "Subir Noticias",
   color: Colors.deepPurple,
   route: '/admin_noticias',
+),
+
+_adminCard(
+  context,
+  icon: Icons.auto_awesome,
+  title: "Experiencia Mágica",
+  color: Colors.amber,
+  route: '/admin_experiencia_magica',
 ),
                 ],
               ),

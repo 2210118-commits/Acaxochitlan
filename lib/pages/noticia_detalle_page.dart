@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/image_viewer_helper.dart';
 import '../widgets/video_player_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 class NoticiaDetallePage extends StatelessWidget {
@@ -366,6 +367,20 @@ class NoticiaDetallePage extends StatelessWidget {
                     ],
 
                     const SizedBox(height: 50),
+
+                    ElevatedButton.icon(
+  onPressed: () async {
+    final lat = noticia['latitud'];
+    final lng = noticia['longitud'];
+
+    final url =
+        'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+
+    launchUrl(Uri.parse(url));
+  },
+  icon: const Icon(Icons.directions),
+  label: const Text('Cómo llegar'),
+)
                   ],
                 ),
               ),

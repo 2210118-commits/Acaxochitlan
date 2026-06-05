@@ -21,45 +21,15 @@ class _FullScreenImageViewerState
   late PageController _pageController;
   late int currentIndex;
 
-  /// 🔥 Precarga actual, siguiente y anterior
-  void _precacheImagenes(int indexActual) {
-
-    // Actual
-    precacheImage(
-      NetworkImage(widget.images[indexActual]),
-      context,
-    );
-
-    // Siguiente
-    if (indexActual + 1 < widget.images.length) {
-      precacheImage(
-        NetworkImage(widget.images[indexActual + 1]),
-        context,
-      );
-    }
-
-    // Anterior
-    if (indexActual - 1 >= 0) {
-      precacheImage(
-        NetworkImage(widget.images[indexActual - 1]),
-        context,
-      );
-    }
-  }
-
   @override
   void initState() {
     super.initState();
 
     currentIndex = widget.initialIndex;
 
-    _pageController =
-        PageController(initialPage: widget.initialIndex);
-
-    /// 🔥 Precargar después del primer frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _precacheImagenes(widget.initialIndex);
-    });
+    _pageController = PageController(
+      initialPage: widget.initialIndex,
+    );
   }
 
   @override
@@ -70,66 +40,117 @@ class _FullScreenImageViewerState
 
   @override
   Widget build(BuildContext context) {
+
+    if (widget.images.isEmpty) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Text(
+            'No hay imágenes',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
+      body: SafeArea(
+        child: Stack(
+          children: [
 
-          /// 🔁 DESLIZAR ENTRE IMÁGENES
-          PageView.builder(
-            controller: _pageController,
-            itemCount: widget.images.length,
-            onPageChanged: (index) {
-              setState(() {
-                currentIndex = index;
-              });
+            PageView.builder(
+              controller: _pageController,
+              itemCount: widget.images.length,
+              onPageChanged: (index) {
+                setState(() {
+                  currentIndex = index;
+                });
+              },
+              itemBuilder: (context, index) {
 
-              _precacheImagenes(index);
-            },
-            itemBuilder: (context, index) {
-              return InteractiveViewer(
-                minScale: 1,
-                maxScale: 4,
-                child: Center(
-                  child: Image.network(
-                    widget.images[index],
-                    fit: BoxFit.contain,
+                final imageUrl = widget.images[index];
+
+                return InteractiveViewer(
+                  minScale: 1,
+                  maxScale: 4,
+                  child: Center(
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                      cacheWidth: 1080,
+                      filterQuality: FilterQuality.low,
+                      loadingBuilder: (
+                        context,
+                        child,
+                        loadingProgress,
+                      ) {
+                        if (loadingProgress == null) {
+                          return child;
+                        }
+
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      },
+                      errorBuilder: (
+                        context,
+                        error,
+                        stackTrace,
+                      ) {
+                        return const Icon(
+                          Icons.broken_image,
+                          color: Colors.white,
+                          size: 60,
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            Positioned(
+              top: 10,
+              right: 10,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 30,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    "${currentIndex + 1} / ${widget.images.length}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
-              );
-            },
-          ),
-
-          /// 🔢 INDICADOR
-          Positioned(
-            bottom: 30,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                "${currentIndex + 1} / ${widget.images.length}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
               ),
             ),
-          ),
-
-          /// ❌ BOTÓN CERRAR
-          Positioned(
-            top: 40,
-            right: 20,
-            child: IconButton(
-              icon: const Icon(
-                Icons.close,
-                color: Colors.white,
-                size: 30,
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

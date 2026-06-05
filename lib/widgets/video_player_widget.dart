@@ -22,14 +22,25 @@ class VideoPlayerWidget extends StatefulWidget {
   State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
 }
 
-class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
+class _VideoPlayerWidgetState extends State<VideoPlayerWidget>
+    with AutomaticKeepAliveClientMixin {
+
+  static final Map<String, Uint8List> _thumbnailCache = {};
+
   Uint8List? _thumbnail;
-  
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
-    _generateThumbnail();
+
+    if (_thumbnailCache.containsKey(widget.videoUrl)) {
+      _thumbnail = _thumbnailCache[widget.videoUrl];
+    } else {
+      _generateThumbnail();
+    }
   }
 
   Future<void> _generateThumbnail() async {
@@ -41,10 +52,14 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         quality: 75,
       );
 
-      if (mounted) {
-        setState(() {
-          _thumbnail = uint8list;
-        });
+      if (uint8list != null) {
+        _thumbnailCache[widget.videoUrl] = uint8list;
+
+        if (mounted) {
+          setState(() {
+            _thumbnail = uint8list;
+          });
+        }
       }
     } catch (_) {}
   }
@@ -55,7 +70,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       MaterialPageRoute(
         builder: (_) => _VideoFullscreenPage(
           videoUrl: widget.videoUrl,
-          
         ),
       ),
     );
@@ -63,6 +77,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return AspectRatio(
       aspectRatio: widget.aspectRatio,
       child: GestureDetector(
@@ -76,8 +92,14 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   ? Image.memory(
                       _thumbnail!,
                       fit: BoxFit.cover,
+                      gaplessPlayback: true,
                     )
-                  : Container(color: Colors.black12),
+                  : Container(
+                      color: Colors.black12,
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
 
               Container(
                 color: Colors.black.withOpacity(0.25),

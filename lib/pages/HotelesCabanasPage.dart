@@ -39,6 +39,8 @@ final facebookCtrl = TextEditingController();
 final actividadCtrl = TextEditingController();
 final platilloNombreCtrl = TextEditingController();
 final platilloPrecioCtrl = TextEditingController();
+final whatsappCtrl = TextEditingController();
+final horarioCtrl = TextEditingController();
 
 
 
@@ -256,6 +258,8 @@ String normalizarNombre(String nombre) {
       'telefono': telefonoCtrl.text.trim(),
       'pagina_web': webCtrl.text.trim(),
       'facebook': facebookCtrl.text.trim(),
+      'whatsapp': whatsappCtrl.text.trim(),
+      'horario': horarioCtrl.text.trim(),
     });
 
     if (!mounted) return;
@@ -723,9 +727,20 @@ _campo(
 ),
 
 _campo(
+  whatsappCtrl,
+  'WhatsApp',
+  tipo: TextInputType.phone,
+),
+
+_campo(
   facebookCtrl,
   'Facebook (URL o nombre)',
   tipo: TextInputType.url,
+),
+
+_campo(
+  horarioCtrl,
+  'Horario',
 ),
 
 

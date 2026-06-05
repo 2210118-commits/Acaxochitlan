@@ -17,6 +17,7 @@ import 'cerca_de_mi_page.dart';
 import 'package:geolocator/geolocator.dart';
 import '../utils/ubicacion_helper.dart';
 import 'noticias_home_section.dart';
+import 'experiencia_magica_page.dart';
 //import para la busqueda
 import 'lugar_card.dart';
 import 'FavoritosPage.dart';
@@ -379,6 +380,19 @@ Future<void> cargarNotificaciones() async {
                 );
               },
             ),
+
+          ListTile(
+  leading: const Icon(Icons.auto_awesome),
+  title: const Text("Experiencia Mágica"),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ExperienciaMagicaPage(),
+      ),
+    );
+  },
+),
             ListTile(
   leading: const Icon(Icons.palette),
   title: const Text("Tienda Hidarte"),

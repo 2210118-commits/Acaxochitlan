@@ -30,6 +30,7 @@ import 'pages/subir_tienda_hidarte_page.dart';
 import 'pages/admin/admin_noticias_page.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'pages/no_internet_page.dart';
+import 'pages/admin/admin_experiencia_magica_page.dart';
 
 // 🔥 FIREBASE
 import 'package:firebase_core/firebase_core.dart';
@@ -301,6 +302,7 @@ class _TurismoAppState extends State<TurismoApp> {
         '/cambiar_fondo_home': (context) =>
             const AdminFondoHomePage(),
         '/admin_noticias': (_) => const AdminNoticiasPage(),
+        '/admin_experiencia_magica': (context) => const AdminExperienciaMagicaPage(),
       },
     );
   }

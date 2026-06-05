@@ -62,15 +62,21 @@ Widget _cardEnlace({
 
   @override
   Widget build(BuildContext context) {
-    final galeria = (lugar['galeria'] ?? []) as List;
+    final galeria = List<String>.from(lugar['galeria'] ?? []);
+final platillos = List<Map<String, dynamic>>.from(
+  lugar['platillos'] ?? [],
+);
+final recamaras = List<Map<String, dynamic>>.from(
+  lugar['recamaras'] ?? [],
+);
     final videos = (lugar['videos'] ?? []) as List;
     final servicios = (lugar['servicios'] ?? []) as List;
     final actividades = (lugar['actividades'] ?? []) as List;
-    final platillos = (lugar['platillos'] ?? []) as List;
-    final recamaras = (lugar['recamaras'] ?? []) as List;
     final telefono = lugar['telefono'];
     final paginaWeb = lugar['pagina_web'];
     final facebook = lugar['facebook'];
+    final whatsapp = lugar['whatsapp'];
+    final horario = lugar['horario'];
     final latitud = lugar['latitud'];
     final longitud = lugar['longitud'];
     final logo = lugar['logo'];
@@ -91,15 +97,22 @@ Widget _cardEnlace({
   initialIndex: 0,
 ),
 
-  child: Hero(
-    tag: lugar['imagen_principal'],
-    child: Image.network(
-      lugar['imagen_principal'],
+  child: Image.network(
+  lugar['imagen_principal'],
+  height: 250,
+  width: double.infinity,
+  fit: BoxFit.cover,
+  cacheWidth: 1200,
+  filterQuality: FilterQuality.low,
+  errorBuilder: (_, __, ___) {
+    return const SizedBox(
       height: 250,
-      width: double.infinity,
-      fit: BoxFit.cover,
-    ),
-  ),
+      child: Center(
+        child: Icon(Icons.broken_image),
+      ),
+    );
+  },
+)
 ),
 
 
@@ -118,11 +131,14 @@ Row(
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Image.network(
-            logo,
-            height: 50,
-            width: 50,
-            fit: BoxFit.cover,
-          ),
+  logo,
+  height: 50,
+  width: 50,
+  fit: BoxFit.cover,
+  errorBuilder: (_, __, ___) {
+    return const Icon(Icons.store);
+  },
+)
         ),
       ),
 
@@ -130,7 +146,7 @@ Row(
       child: Text(
         lugar['nombre'] ?? '',
         style: const TextStyle(
-          fontSize: 24,
+          fontSize: 18,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -138,13 +154,56 @@ Row(
   ],
 ),
 
+if (horario != null &&
+    horario.toString().isNotEmpty) ...[
+  const SizedBox(height: 4),
+
+  Container(
+    padding: const EdgeInsets.symmetric(
+      horizontal: 10,
+      vertical: 6,
+    ),
+    decoration: BoxDecoration(
+      color: const Color.fromARGB(255, 97, 95, 91).withOpacity(0.08),
+      borderRadius: BorderRadius.circular(5),
+      border: Border.all(
+        color: const Color.fromARGB(255, 85, 84, 82).withOpacity(0.25),
+      ),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(
+          Icons.access_time_filled,
+          size: 12,
+          color: Color.fromARGB(255, 15, 15, 15),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            horario,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ),
+      ],
+    ),
+  ),
+
+  const SizedBox(height: 10),
+],
+
 
                 /// 💲 PRECIO
-                if (lugar['precio'] != null && lugar['tipo'] != 'restaurante')
+                if (lugar['precio'] != null &&
+    lugar['precio'].toString().trim().isNotEmpty &&
+    lugar['tipo'] != 'restaurante')
   Text(
-    '\$${lugar['precio']} por noche',
+    lugar['precio'],
     style: const TextStyle(
-      fontSize: 18,
+      fontSize: 12,
       fontWeight: FontWeight.w600,
       color: Colors.green,
     ),
@@ -157,7 +216,7 @@ if (lugar['descripcion'] != null)
   TextoExpandable(
     texto: lugar['descripcion'],
     maxLineas: 3,
-    fontSize: 16,
+    fontSize: 12,
   ),
 
 
@@ -188,14 +247,16 @@ if (lugar['descripcion'] != null)
   images: List<String>.from(galeria),
   initialIndex: i,
 ),
-  child: Hero(
-    tag: galeria[i],
-    child: Image.network(
-      galeria[i],
-      width: 160,
-      fit: BoxFit.cover,
-    ),
-  ),
+  child: Image.network(
+  galeria[i],
+  width: 160,
+  fit: BoxFit.cover,
+  cacheWidth: 400,
+  filterQuality: FilterQuality.low,
+  errorBuilder: (_, __, ___) {
+    return const Icon(Icons.broken_image);
+  },
+)
 ),
 
                         ),
@@ -203,6 +264,7 @@ if (lugar['descripcion'] != null)
                     ),
                   ),
                 ],
+                const SizedBox(height: 10),
 
                 /// 🎥 VIDEOS
 /// 🎥 VIDEOS
@@ -250,6 +312,7 @@ if (videos.isNotEmpty) ...[
       ),
     ),
 ],
+           const SizedBox(height: 10),
 
 
                 /// 🧰 SERVICIOS
@@ -289,6 +352,7 @@ if (videos.isNotEmpty) ...[
                   ),
                   const SizedBox(height: 20),
                 ],
+                
 
                 /// 🛏️ RECÁMARAS
 if (recamaras.isNotEmpty) ...[
@@ -301,7 +365,7 @@ if (recamaras.isNotEmpty) ...[
             if (r['imagen'] != null)
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(12),
+                  top: Radius.circular(3),
                 ),
                 child: GestureDetector(
   onTap: () => ImageViewerHelper.abrir(
@@ -309,21 +373,23 @@ if (recamaras.isNotEmpty) ...[
   images: [r['imagen']],
   initialIndex: 0,
 ),
-  child: Hero(
-    tag: r['imagen'],
-    child: Image.network(
-      r['imagen'],
-      height: 150,
-      width: double.infinity,
-      fit: BoxFit.cover,
-    ),
-  ),
+  child: Image.network(
+  r['imagen'],
+  height: 170,
+  width: double.infinity,
+  fit: BoxFit.cover,
+  cacheWidth: 600,
+  filterQuality: FilterQuality.low,
+  errorBuilder: (_, __, ___) {
+    return const Icon(Icons.broken_image);
+  },
+)
 ),
 
               ),
 
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(1),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -331,7 +397,7 @@ if (recamaras.isNotEmpty) ...[
                     Text(
                       r['nombre'],
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -358,101 +424,120 @@ if (recamaras.isNotEmpty) ...[
 ],
 
                 /// 🍽️ PLATILLOS
-                if (platillos.isNotEmpty) ...[
-                  const Text(
-                    'Platillos',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 10),
-                  GridView.builder(
-  shrinkWrap: true,
-  physics: const NeverScrollableScrollPhysics(),
-  itemCount: platillos.length,
-  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: 2, // 🔥 2 por fila
-    crossAxisSpacing: 10,
-    mainAxisSpacing: 10,
-    childAspectRatio: 0.85,
-  ),
-  itemBuilder: (_, i) {
-    final p = platillos[i];
-
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (p['imagen'] != null)
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
-              child: GestureDetector(
-  onTap: () => ImageViewerHelper.abrir(
-  context,
-  images: [p['imagen']],
-  initialIndex: 0,
-),
-
-  child: Hero(
-    tag: p['imagen'],
-    child: Image.network(
-      p['imagen'],
-      height: 100,
-      width: double.infinity,
-      fit: BoxFit.cover,
+if (platillos.isNotEmpty) ...[
+  const Text(
+    'Platillos',
+    style: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
     ),
   ),
-),
 
-            ),
+  const SizedBox(height: 10),
 
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  p['nombre'] ?? '',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
+  GridView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    itemCount: platillos.length,
+    gridDelegate:
+        const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 3,
+      crossAxisSpacing: 3,
+      mainAxisSpacing: 3,
+      childAspectRatio: 0.78,
+    ),
+    itemBuilder: (_, i) {
+      final p = platillos[i];
+
+      final tieneImagen = p['imagen'] != null &&
+          p['imagen'].toString().isNotEmpty;
+
+      final tieneNombre = p['nombre'] != null &&
+          p['nombre'].toString().isNotEmpty;
+
+      final tienePrecio = p['precio'] != null;
+
+      return Card(
+        elevation: 1,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Column(
+          children: [
+
+            /// IMAGEN
+            if (tieneImagen)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => ImageViewerHelper.abrir(
+                    context,
+                    images: [p['imagen'].toString()],
+                    initialIndex: 0,
                   ),
-                ),
-
-                if (p['precio'] != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      '\$${p['precio']}',
-                      style: const TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+                  child: Image.network(
+  p['imagen'],
+  width: double.infinity,
+  height: double.infinity,
+  fit: BoxFit.cover,
+  cacheWidth: 400,
+  filterQuality: FilterQuality.low,
+  errorBuilder: (_, __, ___) {
+    return const Icon(Icons.broken_image);
   },
-),
+)
+                ),
+              ),
 
-                  const SizedBox(height: 20),
-                ],
+            /// SOLO SI EXISTE NOMBRE O PRECIO
+            if (tieneNombre || tienePrecio)
+              Padding(
+                padding: const EdgeInsets.all(6),
+                child: Column(
+                  children: [
+
+                    if (tieneNombre)
+                      Text(
+                        p['nombre'],
+                        textAlign: TextAlign.center,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                    if (tienePrecio)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          '\$${p['precio']}',
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      );
+    },
+  ),
+
+  const SizedBox(height: 20),
+],
 
                 /// 🌐 Enlaces y ubicación
 if (
   (paginaWeb != null && paginaWeb.toString().isNotEmpty) ||
   (facebook != null && facebook.toString().isNotEmpty) ||
   (telefono != null && telefono.toString().isNotEmpty) ||
+  (whatsapp != null && whatsapp.toString().isNotEmpty) ||
   (latitud != null && longitud != null)
 ) ...[
   const SizedBox(height: 30),
@@ -460,7 +545,7 @@ if (
   const Text(
     'Enlaces',
     style: TextStyle(
-      fontSize: 18,
+      fontSize: 14,
       fontWeight: FontWeight.bold,
     ),
   ),
@@ -495,6 +580,16 @@ if (telefono != null && telefono.toString().isNotEmpty)
           url: paginaWeb,
         ),
 
+      if (whatsapp != null &&
+    whatsapp.toString().isNotEmpty)
+  _cardEnlace(
+    context: context,
+    icon: Icons.chat,
+    label: 'WhatsApp',
+    color: Colors.green,
+    url: 'https://wa.me/$whatsapp',
+  ),
+
       /// Facebook
       if (facebook != null && facebook.toString().isNotEmpty)
         _cardEnlace(
@@ -508,7 +603,7 @@ if (telefono != null && telefono.toString().isNotEmpty)
   ),
   /// 🗺️ Cómo llegar
 if (latitud != null && longitud != null) ...[
-  const SizedBox(height: 20),
+  const SizedBox(height: 14),
 
   SizedBox(
     width: double.infinity,
@@ -521,9 +616,9 @@ if (latitud != null && longitud != null) ...[
       icon: const Icon(Icons.directions),
       label: const Text("Cómo llegar"),
       style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
     ),

@@ -22,6 +22,15 @@ class _AdminNoticiasPageState
   final TextEditingController descripcionController =
       TextEditingController();
 
+  final TextEditingController ubicacionController =
+    TextEditingController();
+
+final TextEditingController latitudController =
+    TextEditingController();
+
+final TextEditingController longitudController =
+    TextEditingController();
+
   final ImagePicker picker = ImagePicker();
 
   String obtenerCarpetaNoticia() {
@@ -243,6 +252,11 @@ class _AdminNoticiasPageState
         'titulo': tituloController.text.trim(),
         'descripcion':
             descripcionController.text.trim(),
+        'ubicacion': ubicacionController.text.trim(),
+'latitud': double.tryParse(
+    latitudController.text.trim()),
+'longitud': double.tryParse(
+    longitudController.text.trim()),
         'imagen': imagenUrl,
         'categoria': categoriaSeleccionada,
         'galeria': galeria,
@@ -540,6 +554,9 @@ class _AdminNoticiasPageState
                   ),
                 ),
 
+                const SizedBox(height: 16),
+
+
                 if (noticia['galeria'] != null)
                   Padding(
                     padding:
@@ -804,6 +821,48 @@ class _AdminNoticiasPageState
 
             const SizedBox(height: 16),
 
+            const SizedBox(height: 16),
+
+TextField(
+  controller: ubicacionController,
+  decoration: InputDecoration(
+    labelText: '¿Cómo llegar?',
+    prefixIcon: Icon(Icons.location_on),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+    ),
+  ),
+),
+
+const SizedBox(height: 16),
+
+TextField(
+  controller: latitudController,
+  keyboardType: TextInputType.number,
+  decoration: InputDecoration(
+    labelText: 'Latitud',
+    prefixIcon: Icon(Icons.map),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+    ),
+  ),
+),
+
+const SizedBox(height: 16),
+
+TextField(
+  controller: longitudController,
+  keyboardType: TextInputType.number,
+  decoration: InputDecoration(
+    labelText: 'Longitud',
+    prefixIcon: Icon(Icons.map_outlined),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+    ),
+  ),
+),
+            
+
             /// CATEGORIA
             DropdownButtonFormField<String>(
               value: categoriaSeleccionada,
@@ -829,6 +888,14 @@ class _AdminNoticiasPageState
                   value: 'Avisos',
                   child: Text('Avisos'),
                 ),
+                DropdownMenuItem(
+                  value: 'Atractivos Turísticos',
+                  child: Text('Atractivos Turísticos'),
+                ),
+                DropdownMenuItem(
+  value: 'Ver más',
+  child: Text('Ver más'),
+),
               ],
               onChanged: (value) {
                 setState(() {
