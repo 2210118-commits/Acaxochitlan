@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/bottom_nav.dart';
 
 class ServiciosEmergenciaPage extends StatefulWidget {
   const ServiciosEmergenciaPage({super.key});
@@ -105,6 +106,10 @@ class _ServiciosEmergenciaPageState extends State<ServiciosEmergenciaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+      bottomNavigationBar: const BottomNav(
+  currentIndex: 3,
+),
 
       appBar: AppBar(
         title: const Text("Servicios de emergencia"),

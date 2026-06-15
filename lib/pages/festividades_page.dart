@@ -7,6 +7,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'dart:typed_data';
 import 'package:acaxochi/widgets/texto_expandable.dart';
 import 'detalle_festividad_page.dart';
+import '../widgets/bottom_nav.dart';
 
 class FestividadesPage extends StatelessWidget {
   const FestividadesPage({super.key});
@@ -119,6 +120,9 @@ final List<String> videos =
         .order('fecha', ascending: false);
 
     return Scaffold(
+      bottomNavigationBar: const BottomNav(
+  currentIndex: 0,
+),
       appBar: AppBar(title: const Text('Festividades')),
 
       // 🔥 BOTÓN SOLO PARA ADMIN

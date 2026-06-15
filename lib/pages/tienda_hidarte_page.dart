@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'detalle_tienda_hidarte_page.dart';
+import '../widgets/bottom_nav.dart';
 
 class TiendaHidartePage extends StatefulWidget {
   const TiendaHidartePage({super.key});
@@ -56,6 +57,9 @@ class _TiendaHidartePageState extends State<TiendaHidartePage> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
+      bottomNavigationBar: const BottomNav(
+  currentIndex: 2,
+),
       body: Center(
         child: CircularProgressIndicator(),
       ),

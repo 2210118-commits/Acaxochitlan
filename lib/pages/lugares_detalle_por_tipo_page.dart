@@ -3,7 +3,7 @@ import 'package:acaxochi/widgets/texto_expandable.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../utils/image_viewer_helper.dart';
 import 'package:acaxochi/widgets/video_player_widget.dart';
-
+import '../widgets/bottom_nav.dart';
 
 class LugaresDetallePorTipoPage extends StatelessWidget {
   final Map<String, dynamic> lugar;
@@ -83,6 +83,9 @@ final recamaras = List<Map<String, dynamic>>.from(
 
 
     return Scaffold(
+      bottomNavigationBar: const BottomNav(
+  currentIndex: 0,
+),
       appBar: AppBar(
         title: Text(lugar['nombre']),
       ),

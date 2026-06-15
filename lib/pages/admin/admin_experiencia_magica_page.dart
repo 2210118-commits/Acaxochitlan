@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class AdminExperienciaMagicaPage extends StatefulWidget {
   const AdminExperienciaMagicaPage({super.key});
@@ -72,6 +73,8 @@ final longitudController =
   List<File> imagenes = [];
 
   List<File> videos = [];
+  List<File> imagenesExtra = [];
+List<TextEditingController> descripcionesImagenesExtra = [];
 
   bool cargando = false;
 
@@ -163,8 +166,25 @@ final longitudController =
   if (pickedFiles.isEmpty) return;
 
   setState(() {
-    imagenes =
-        pickedFiles.map((e) => File(e.path)).toList();
+  imagenes.addAll(
+    pickedFiles.map((e) => File(e.path),
+  ));
+});
+}
+
+Future<void> agregarImagenExtra() async {
+  final XFile? imagen = await ImagePicker().pickImage(
+    source: ImageSource.gallery,
+    imageQuality: 80,
+  );
+
+  if (imagen == null) return;
+
+  setState(() {
+    imagenesExtra.add(File(imagen.path));
+    descripcionesImagenesExtra.add(
+      TextEditingController(),
+    );
   });
 }
 
@@ -207,29 +227,60 @@ Future<void> seleccionarVideo() async {
       });
 
      List<String> urlsImagenes = [];
+String imagenPrincipal = "";
 
 for (int i = 0; i < imagenes.length; i++) {
-
   final nombreArchivo =
+      "$nombreLugar/imagen_${i + 1}_${DateTime.now().millisecondsSinceEpoch}.jpg";
 
-      "$nombreLugar/"
-      "imagen_${i + 1}_${DateTime.now().millisecondsSinceEpoch}.jpg";
+  final comprimida =
+      await FlutterImageCompress.compressAndGetFile(
+    imagenes[i].path,
+    "${imagenes[i].path}_comprimida.jpg",
+    quality: 70,
+    minWidth: 900,
+    minHeight: 900,
+    keepExif: false,
+  );
+
+  final archivo = File(
+    comprimida?.path ?? imagenes[i].path,
+  );
 
   await supabase.storage
       .from('experiencia-magica')
-      .upload(
-        nombreArchivo,
-        imagenes[i],
-      );
+      .upload(nombreArchivo, archivo);
 
-  final imageUrl =
-      supabase.storage
-          .from('experiencia-magica')
-          .getPublicUrl(
-            nombreArchivo,
-          );
+  final url = supabase.storage
+      .from('experiencia-magica')
+      .getPublicUrl(nombreArchivo);
 
-  urlsImagenes.add(imageUrl);
+  urlsImagenes.add(url);
+
+  if (i == 0) {
+    imagenPrincipal = url;
+  }
+}
+
+List<Map<String, dynamic>> galeriaExtra = [];
+
+for (int i = 0; i < imagenesExtra.length; i++) {
+  final nombreArchivo =
+      "$nombreLugar/extra_${i + 1}.jpg";
+
+  await supabase.storage
+      .from('experiencia-magica')
+      .upload(nombreArchivo, imagenesExtra[i]);
+
+  final url = supabase.storage
+      .from('experiencia-magica')
+      .getPublicUrl(nombreArchivo);
+
+  galeriaExtra.add({
+    'imagen': url,
+    'descripcion':
+        descripcionesImagenesExtra[i].text.trim(),
+  });
 }
 
 List<String> videosUrls = [];
@@ -272,6 +323,8 @@ for (int i = 0; i < videos.length; i++) {
         'categoria': categoria,
 
         'imagenes': urlsImagenes,
+        'imagen_principal': imagenPrincipal,
+        'galeria_extra': galeriaExtra,
 
         'videos': videosUrls,
 
@@ -335,13 +388,16 @@ for (int i = 0; i < videos.length; i++) {
     }
 
     setState(() {
-
   imagenes.clear();
-
+  imagenesExtra.clear();
   videos.clear();
 
-  categoria = "Taquerías";
+  for (final controller in descripcionesImagenesExtra) {
+    controller.dispose();
+  }
+  descripcionesImagenesExtra.clear();
 
+  categoria = "Taquerías";
 });
   }
 
@@ -619,6 +675,7 @@ campo(
                     ),
                   ),
                   if (videos.isNotEmpty)
+
   SizedBox(
     height: 90,
     child: ListView.builder(
@@ -678,6 +735,53 @@ SizedBox(
     ),
     label: const Text(
       "Seleccionar video",
+    ),
+  ),
+),
+const SizedBox(height: 15),
+
+SizedBox(
+  width: double.infinity,
+  height: 55,
+  child: ElevatedButton.icon(
+    onPressed: agregarImagenExtra,
+    icon: const Icon(Icons.add_photo_alternate),
+    label: const Text("Agregar imagen extra"),
+  ),
+),
+const SizedBox(height: 15),
+
+...List.generate(
+  imagenesExtra.length,
+  (index) => Container(
+    margin: const EdgeInsets.only(bottom: 16),
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.grey.shade100,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.file(
+            imagenesExtra[index],
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ),
+
+        const SizedBox(height: 10),
+
+        TextField(
+          controller: descripcionesImagenesExtra[index],
+          decoration: const InputDecoration(
+            labelText: "Descripción de esta imagen",
+            border: OutlineInputBorder(),
+          ),
+        ),
+      ],
     ),
   ),
 ),

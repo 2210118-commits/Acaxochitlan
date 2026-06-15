@@ -5,6 +5,7 @@ import '../widgets/video_player_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'editar_tienda_hidarte_page.dart';
+import '../widgets/bottom_nav.dart';
 
 class DetalleTiendaHidartePage extends StatelessWidget {
   final Map<String, dynamic> producto;
@@ -61,6 +62,9 @@ final lat = producto['latitud'];
 final lng = producto['longitud'];
 
     return Scaffold(
+      bottomNavigationBar: const BottomNav(
+  currentIndex: 2,
+),
       appBar: AppBar(
   title: Text(producto['nombre'] ?? 'Detalle'),
   actions: [

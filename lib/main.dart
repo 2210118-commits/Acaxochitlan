@@ -38,6 +38,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:acaxochi/services/connectivity_service.dart';
+
 /// 🔔 Plugin de notificaciones locales
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -54,69 +57,71 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // WINDOWS
-  if (Platform.isWindows) {
-    try {
-      await SupabaseConfig.initialize();
-      print("✅ Supabase Windows iniciado");
-    } catch (e) {
-      print("❌ Supabase Windows error: $e");
-    }
+  print("🚀 INICIANDO APP");
 
-    runApp(const TurismoApp());
-    return;
-  }
+  bool conectado = await InternetConnection().hasInternetAccess;
 
-  // FIREBASE separado
   try {
     await Firebase.initializeApp();
-
-    FirebaseMessaging.onBackgroundMessage(
-      _firebaseMessagingBackgroundHandler,
-    );
-
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'high_importance_channel',
-      'Notificaciones Importantes',
-      description: 'Canal para notificaciones importantes.',
-      importance: Importance.max,
-      playSound: true,
-    );
-
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel);
-
-    print("✅ Firebase iniciado");
+    print("✅ FIREBASE OK");
   } catch (e) {
-    print("❌ Firebase error: $e");
+    print("❌ FIREBASE ERROR: $e");
   }
 
-  // SUPABASE separado
-  try {
-    await SupabaseConfig.initialize();
-    print("✅ Supabase iniciado");
-  } catch (e) {
-    print("❌ Supabase error: $e");
-  }
+  
+    try {
+      await SupabaseConfig.initialize();
+      print("✅ SUPABASE OK");
+    } catch (e) {
+      print("❌ SUPABASE ERROR: $e");
+    }
+  
 
-  runApp(const TurismoApp());
+  print("🚀 ANTES DE RUNAPP");
+  ConnectivityService.iniciar();
+
+  runApp(
+    TurismoApp(
+      tieneInternet: conectado,
+    ),
+  );
 }
 
 class TurismoApp extends StatefulWidget {
-  const TurismoApp({super.key});
+  final bool tieneInternet;
+
+  const TurismoApp({
+    super.key,
+    required this.tieneInternet,
+  });
 
   @override
   State<TurismoApp> createState() => _TurismoAppState();
 }
 
 class _TurismoAppState extends State<TurismoApp> {
+
+  
   @override
   void initState() {
     super.initState();
     _configurarFCM();
   }
+
+  Future<bool> tieneInternet() async {
+  final resultados = await Connectivity().checkConnectivity();
+
+  final hayRed =
+      resultados.contains(ConnectivityResult.wifi) ||
+      resultados.contains(ConnectivityResult.mobile) ||
+      resultados.contains(ConnectivityResult.ethernet);
+
+  if (!hayRed) return false;
+
+  return await InternetConnection().hasInternetAccess;
+}
+
+
 
   Future<void> _configurarFCM() async {
     if (Platform.isWindows) return;
@@ -193,6 +198,7 @@ class _TurismoAppState extends State<TurismoApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+  navigatorKey: ConnectivityService.navigatorKey,
       title: 'Explorando Acaxochitlán',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -210,36 +216,10 @@ class _TurismoAppState extends State<TurismoApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
 
-      home: FutureBuilder<List<ConnectivityResult>>(
-  future: Connectivity().checkConnectivity(),
-  builder: (context, snapshot) {
-    if (!snapshot.hasData) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
 
-    final resultados = snapshot.data!;
-
-    final conectado =
-        resultados.contains(
-          ConnectivityResult.wifi,
-        ) ||
-        resultados.contains(
-          ConnectivityResult.mobile,
-        ) ||
-        resultados.contains(
-          ConnectivityResult.ethernet,
-        );
-
-    return conectado
-        ? const HomePage()
-        : const NoInternetPage();
-  },
-),
-
+home: widget.tieneInternet
+    ? const HomePage()
+    : const NoInternetPage(),
       navigatorObservers: [routeObserver],
 
       onGenerateRoute: (settings) {
@@ -303,6 +283,7 @@ class _TurismoAppState extends State<TurismoApp> {
             const AdminFondoHomePage(),
         '/admin_noticias': (_) => const AdminNoticiasPage(),
         '/admin_experiencia_magica': (context) => const AdminExperienciaMagicaPage(),
+        '/no_internet_page': (context) => const NoInternetPage(),
       },
     );
   }

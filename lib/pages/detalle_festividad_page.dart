@@ -5,6 +5,7 @@ import '../widgets/texto_expandable.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/bottom_nav.dart';
 
 class DetalleFestividadPage extends StatefulWidget {
   final Map<String, dynamic> festividad;
@@ -131,6 +132,9 @@ final String fechaFin = festividad['fecha_fin']?.toString() ?? '';
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        bottomNavigationBar: const BottomNav(
+  currentIndex: 0,
+),
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [

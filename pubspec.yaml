@@ -1,7 +1,7 @@
 name: acaxochi
 description: Aplicación turística de Acaxochitlán
 
-version: 1.0.2+16
+version: 1.0.2+17
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -44,6 +44,8 @@ dependencies:
   media_kit_video: ^2.0.1
   media_kit_libs_windows_video: ^1.0.11
   connectivity_plus: ^6.0.5
+  internet_connection_checker_plus: ^2.5.2
+  flutter_image_compress: ^2.4.0
   
 
 dev_dependencies:

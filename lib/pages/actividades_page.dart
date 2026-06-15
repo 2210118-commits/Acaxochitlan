@@ -5,7 +5,7 @@ import 'package:video_player/video_player.dart';
 import 'dart:typed_data';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:acaxochi/widgets/texto_expandable.dart';
-
+import '../widgets/bottom_nav.dart';
 
 
 
@@ -21,6 +21,9 @@ class ActividadesPage extends StatelessWidget {
         .order('fecha_creacion', ascending: false);
 
     return Scaffold(
+      bottomNavigationBar: const BottomNav(
+  currentIndex: 0,
+),
       appBar: AppBar(
         title: const Text('Actividades'),
       ),

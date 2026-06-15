@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'favoritos_service.dart';
 import 'lugares_detalle_por_tipo_page.dart';
+import '../widgets/bottom_nav.dart';
 
 class FavoritosPage extends StatefulWidget {
   const FavoritosPage({super.key});
@@ -65,6 +66,9 @@ class _FavoritosPageState extends State<FavoritosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: const BottomNav(
+  currentIndex: 1,
+),
       appBar: AppBar(
         title: const Text("Mis Favoritos"),
       ),

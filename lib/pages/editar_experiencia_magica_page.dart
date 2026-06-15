@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -76,6 +76,14 @@ class _EditarExperienciaMagicaPageState
   List<String> imagenesActuales = [];
 
   List<File> nuevasImagenes = [];
+  List<Map<String, dynamic>> galeriaExtraActual = [];
+
+List<File> nuevasImagenesExtra = [];
+List<TextEditingController>
+    descripcionesActualesExtra = [];
+
+List<TextEditingController>
+    descripcionesImagenesExtra = [];
 
   List<String> videosActuales = [];
 List<File> nuevosVideos = [];
@@ -131,6 +139,17 @@ List<File> nuevosVideos = [];
       lugar['imagenes'] ?? [],
     );
 
+    galeriaExtraActual =
+    List<Map<String, dynamic>>.from(
+  widget.lugar['galeria_extra'] ?? [],
+);
+descripcionesActualesExtra =
+    galeriaExtraActual.map((item) {
+  return TextEditingController(
+    text: item["descripcion"] ?? "",
+  );
+}).toList();
+
     videosActuales =
     List<String>.from(
       lugar['videos'] ?? [],
@@ -158,6 +177,26 @@ List<File> nuevosVideos = [];
     });
   }
 
+  Future<void> agregarImagenExtra() async {
+  final XFile? imagen =
+      await ImagePicker().pickImage(
+    source: ImageSource.gallery,
+    imageQuality: 80,
+  );
+
+  if (imagen == null) return;
+
+  setState(() {
+    nuevasImagenesExtra.add(
+      File(imagen.path),
+    );
+
+    descripcionesImagenesExtra.add(
+      TextEditingController(),
+    );
+  });
+}
+
   Future<void> seleccionarVideo() async {
 
   final picked =
@@ -177,15 +216,37 @@ List<File> nuevosVideos = [];
   });
 }
 
-  void eliminarImagenActual(
-      int index) {
+  void eliminarImagenActual(int index) {
+  setState(() {
+    imagenesActuales.removeAt(index);
+  });
+}
 
-    setState(() {
+void establecerComoPrincipal(int index) {
+  setState(() {
+    final imagen = imagenesActuales.removeAt(index);
+    imagenesActuales.insert(0, imagen);
+  });
+}
 
-      imagenesActuales
-          .removeAt(index);
-    });
-  }
+void eliminarImagenExtraActual(int index) {
+  setState(() {
+    descripcionesActualesExtra[index]
+        .dispose();
+    descripcionesActualesExtra
+        .removeAt(index);
+    galeriaExtraActual.removeAt(index);
+  });
+}
+
+void eliminarImagenExtraNueva(int index) {
+  setState(() {
+    descripcionesImagenesExtra[index].dispose();
+    descripcionesImagenesExtra.removeAt(index);
+    nuevasImagenesExtra.removeAt(index);
+  });
+}
+  
 
   void eliminarImagenNueva(
       int index) {
@@ -210,6 +271,7 @@ List<File> nuevosVideos = [];
 
   Future<void>
       actualizarLugar() async {
+        
 
     try {
 
@@ -217,6 +279,13 @@ List<File> nuevosVideos = [];
 
         cargando = true;
       });
+
+      for (int i = 0; i < galeriaExtraActual.length; i++) {
+  galeriaExtraActual[i]["descripcion"] =
+      descripcionesActualesExtra[i]
+          .text
+          .trim();
+}
 
       List<String>
           imagenesFinales = [];
@@ -226,34 +295,73 @@ List<File> nuevosVideos = [];
         imagenesActuales,
       );
 
-      for (int i = 0;
-          i < nuevasImagenes.length;
-          i++) {
+      for (int i = 0; i < nuevasImagenes.length; i++) {
 
-        final nombreArchivo =
+  final nombreArchivo =
+      "${DateTime.now().millisecondsSinceEpoch}_edit_$i.jpg";
 
-            "${DateTime.now().millisecondsSinceEpoch}_edit_$i.jpg";
+  final comprimida =
+      await FlutterImageCompress.compressAndGetFile(
+    nuevasImagenes[i].path,
+    "${nuevasImagenes[i].path}_comprimida.jpg",
+    quality: 70,
+    minWidth: 900,
+    minHeight: 900,
+    keepExif: false,
+  );
 
-        await supabase.storage
-            .from(
-                'experiencia-magica')
-            .upload(
-              nombreArchivo,
-              nuevasImagenes[i],
-            );
+  final archivo =
+      File(comprimida?.path ?? nuevasImagenes[i].path);
 
-        final url =
-            supabase.storage
-                .from(
-                    'experiencia-magica')
-                .getPublicUrl(
-                  nombreArchivo,
-                );
+  await supabase.storage
+      .from('experiencia-magica')
+      .upload(
+        nombreArchivo,
+        archivo,
+      );
 
-        imagenesFinales.add(
-          url,
-        );
-      }
+  final url = supabase.storage
+      .from('experiencia-magica')
+      .getPublicUrl(nombreArchivo);
+
+  imagenesFinales.add(url);
+}
+
+List<Map<String, dynamic>>
+    galeriaExtraFinal = [];
+
+galeriaExtraFinal.addAll(
+  galeriaExtraActual,
+);
+
+for (int i = 0;
+    i < nuevasImagenesExtra.length;
+    i++) {
+
+  final nombreArchivo =
+      "${DateTime.now().millisecondsSinceEpoch}_extra_$i.jpg";
+
+  await supabase.storage
+      .from('experiencia-magica')
+      .upload(
+        nombreArchivo,
+        nuevasImagenesExtra[i],
+      );
+
+  final url = supabase.storage
+      .from('experiencia-magica')
+      .getPublicUrl(
+        nombreArchivo,
+      );
+
+  galeriaExtraFinal.add({
+    'imagen': url,
+    'descripcion':
+        descripcionesImagenesExtra[i]
+            .text
+            .trim(),
+  });
+}
 
       List<String> videosFinales = [];
 
@@ -301,8 +409,15 @@ for (int i = 0;
         'categoria':
             categoria,
 
+        'imagen_principal': imagenesFinales.isNotEmpty
+    ? imagenesFinales.first
+    : null,
+
+
         'imagenes':
             imagenesFinales,
+
+        'galeria_extra': galeriaExtraFinal,
 
         'videos': videosFinales,
 
@@ -736,6 +851,33 @@ for (int i = 0;
                       ),
 
                       Positioned(
+  left: 5,
+  bottom: 5,
+  child: GestureDetector(
+    onTap: () {
+      establecerComoPrincipal(index);
+    },
+    child: Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 6,
+        vertical: 3,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.blue,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        index == 0 ? "Principal" : "Hacer principal",
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+        ),
+      ),
+    ),
+  ),
+),
+
+                      Positioned(
 
                         right: 5,
 
@@ -799,6 +941,110 @@ for (int i = 0;
             const SizedBox(
               height: 25,
             ),
+
+            ElevatedButton.icon(
+  onPressed: agregarImagenExtra,
+  icon: const Icon(
+    Icons.add_photo_alternate,
+  ),
+  label: const Text(
+    "Agregar imagen extra",
+  ),
+),
+...List.generate(
+  nuevasImagenesExtra.length,
+  (index) => Card(
+    margin: const EdgeInsets.only(bottom: 15),
+    child: Padding(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        children: [
+          Image.file(
+            nuevasImagenesExtra[index],
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+
+          const SizedBox(height: 10),
+
+          TextField(
+            controller:
+                descripcionesImagenesExtra[index],
+            decoration: const InputDecoration(
+              labelText:
+                  "Descripción de la imagen",
+            ),
+          ),
+
+          IconButton(
+            onPressed: () {
+              eliminarImagenExtraNueva(index);
+            },
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+),
+const SizedBox(height: 15),
+
+if (galeriaExtraActual.isNotEmpty)
+  const Align(
+    alignment: Alignment.centerLeft,
+    child: Text(
+      "Imágenes extra actuales",
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
+
+...List.generate(
+  galeriaExtraActual.length,
+  (index) => Card(
+    margin: const EdgeInsets.only(bottom: 15),
+    child: Padding(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        children: [
+          Image.network(
+            galeriaExtraActual[index]["imagen"],
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+
+          const SizedBox(height: 10),
+
+          TextField(
+  controller:
+      descripcionesActualesExtra[index],
+  decoration: const InputDecoration(
+    labelText: "Descripción",
+    border: OutlineInputBorder(),
+  ),
+),
+
+          IconButton(
+            onPressed: () {
+              eliminarImagenExtraActual(index);
+            },
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+),
 
             if (videosActuales.isNotEmpty ||
     nuevosVideos.isNotEmpty)

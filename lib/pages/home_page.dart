@@ -18,6 +18,8 @@ import 'package:geolocator/geolocator.dart';
 import '../utils/ubicacion_helper.dart';
 import 'noticias_home_section.dart';
 import 'experiencia_magica_page.dart';
+import '../widgets/bottom_nav.dart';
+
 //import para la busqueda
 import 'lugar_card.dart';
 import 'FavoritosPage.dart';
@@ -44,7 +46,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin, Rout
 
   bool pausarVideoHome = false;
   
-
+  
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
 List<dynamic> resultadosBusqueda = [];
 bool buscando = false;
@@ -202,6 +205,7 @@ Future<void> cargarNotificaciones() async {
   @override
   void dispose() {
     routeObserver.unsubscribe(this);
+    _scrollController.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -211,6 +215,16 @@ Future<void> cargarNotificaciones() async {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      bottomNavigationBar: BottomNav(
+  currentIndex: 0,
+  onHomePressed: () {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  },
+),
   onDrawerChanged: (isOpen) {
     setState(() {
       pausarVideoHome = isOpen;
@@ -611,6 +625,7 @@ if (esAdmin) ...[
             color: const Color.fromARGB(102, 82, 80, 80),
           ),
           SingleChildScrollView(
+            controller: _scrollController,
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: SlideTransition(
@@ -738,7 +753,7 @@ if (_searchController.text.trim().isNotEmpty && resultadosBusqueda.isNotEmpty)
   ),
 
 
-
+//BOTONES DE FESTIVIDADES Y CERCA DE MI
                     Row(
   mainAxisAlignment: MainAxisAlignment.center,
   children: [

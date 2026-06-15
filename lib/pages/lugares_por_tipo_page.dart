@@ -3,6 +3,7 @@ import 'lugares_detalle_por_tipo_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'EditarLugarPage.dart';
 import 'favoritos_service.dart';
+import '../widgets/bottom_nav.dart';
 
 class LugaresPorTipoPage extends StatefulWidget {
   final String tipo; // 'hotel' o 'cabana'
@@ -220,6 +221,9 @@ Future<void> _eliminarArchivosStorage(Map<String, dynamic> lugar) async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: const BottomNav(
+  currentIndex: 0,
+),
       appBar: AppBar(title: Text(widget.titulo)),
       body: FutureBuilder<List<dynamic>>(
         future: _future,
@@ -237,11 +241,7 @@ Future<void> _eliminarArchivosStorage(Map<String, dynamic> lugar) async {
           if (lugares.isEmpty) {
             return const Center(child: Text('No hay registros'));
           }
-
-          // 🔥 REEMPLAZA ÚNICAMENTE ESTE BLOQUE:
 // return GridView.builder( ... );
-//
-// 👇 POR ESTE:
 
 return ListView.builder(
   padding: const EdgeInsets.all(12),
@@ -295,7 +295,7 @@ return ListView.builder(
                       ),
               ),
 
-              /// 📄 INFORMACIÓN
+              /// INFORMACIÓN
               Padding(
                 padding: const EdgeInsets.all(14),
                 child: Column(

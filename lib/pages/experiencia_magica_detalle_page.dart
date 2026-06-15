@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/bottom_nav.dart';
 
 import '../widgets/video_player_widget.dart';
 import '../widgets/texto_expandable.dart';
@@ -29,12 +30,21 @@ class ExperienciaMagicaDetallePage extends StatelessWidget {
     final List<String> imagenes =
         List<String>.from(lugar['imagenes'] ?? []);
 
+    final List<Map<String, dynamic>> galeriaExtra =
+    (lugar['galeria_extra'] as List?)
+        ?.map((e) => Map<String, dynamic>.from(e))
+        .toList() ??
+    [];
+
     final List<String> videos =
     List<String>.from(
       lugar['videos'] ?? [],
     );
 
     return Scaffold(
+      bottomNavigationBar: const BottomNav(
+  currentIndex: 0,
+),
       backgroundColor: const Color(0xffF5F7FA),
 
       body: CustomScrollView(
@@ -275,6 +285,48 @@ class ExperienciaMagicaDetallePage extends StatelessWidget {
 
                     const SizedBox(height: 30),
                   ],
+//IMAGENES EXTRA
+if (galeriaExtra.isNotEmpty) ...[
+  const SizedBox(height: 15),
+
+  ...galeriaExtra.map((item) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+  onTap: () {
+    ImageViewerHelper.abrir(
+      context,
+      images: galeriaExtra
+          .map<String>(
+            (e) => e['imagen'].toString(),
+          )
+          .toList(),
+      initialIndex: galeriaExtra.indexOf(item),
+    );
+  },
+  child: ClipRRect(
+    borderRadius: BorderRadius.circular(8),
+    child: Image.network(
+      item['imagen'].toString(),
+      width: double.infinity,
+      height: 170,
+      fit: BoxFit.cover,
+    ),
+  ),
+),
+          const SizedBox(height: 8),
+          Text(
+            item['descripcion']?.toString() ?? '',
+            style: const TextStyle(fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }).toList(),
+],
 
 if (videos.isNotEmpty) ...[
 

@@ -22,23 +22,33 @@ class _NoticiasHomeSectionState
   }
 
   Future<void> cargarNoticias() async {
-    try {
-      final response = await Supabase.instance.client
-          .from('noticias')
-          .select()
-          .order('fecha', ascending: false)
-          .limit(5);
+  try {
+    print("🚀 CONSULTANDO NOTICIAS");
 
-      if (!mounted) return;
+    final response = await Supabase.instance.client
+        .from('noticias')
+        .select()
+        .order('fecha', ascending: false)
+        .limit(5);
 
-      setState(() {
-        noticias = response;
-        cargando = false;
-      });
-    } catch (e) {
-      print('Error noticias: $e');
-    }
+    print("🔥 NOTICIAS: $response");
+
+    if (!mounted) return;
+
+    setState(() {
+      noticias = response;
+      cargando = false;
+    });
+  } catch (e) {
+    print("❌ ERROR NOTICIAS: $e");
+
+    if (!mounted) return;
+
+    setState(() {
+      cargando = false;
+    });
   }
+}
 
   Widget _cardNoticia(Map noticia) {
   return InkWell(

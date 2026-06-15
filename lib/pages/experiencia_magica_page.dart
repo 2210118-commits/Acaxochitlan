@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'experiencia_magica_detalle_page.dart';
 import 'editar_experiencia_magica_page.dart';
 import 'package:acaxochi/widgets/texto_expandable.dart';
+import '../widgets/bottom_nav.dart';
 
 class ExperienciaMagicaPage extends StatefulWidget {
   const ExperienciaMagicaPage({super.key});
@@ -39,17 +40,7 @@ String categoriaSeleccionada = 'Todos';
   return user != null;
 }
 
-List<String> get categorias {
-  final lista = lugares
-      .map((e) => e['categoria']?.toString() ?? '')
-      .where((e) => e.isNotEmpty)
-      .toSet()
-      .toList();
-
-  lista.sort();
-
-  return ['Todos', ...lista];
-}
+List<String> categorias = ['Todos'];
 
 void filtrarCategoria(String categoria) {
   setState(() {
@@ -75,62 +66,90 @@ void filtrarCategoria(String categoria) {
 
     try {
 
-      setState(() {
+        if (mounted) {
+  setState(() {
+    cargando = true;
+    sinInternet = false;
+  });
+}
 
-        cargando = true;
+      final results = await Future.wait([
+  supabase
+    .from('experiencia_magica')
+    .select(
+      '''
+      id,
+      nombre,
+      descripcion,
+      categoria,
+      imagen_principal,
+      imagenes,
+      galeria_extra,
+      videos,
+      telefono,
+      horario,
+      whatsapp,
+      facebook,
+      maps_url,
+      ubicacion,
+      latitud,
+      longitud,
+      orden
+      '''
+    )
+    .order('orden', ascending: true, nullsFirst: false)
+    .order('id', ascending: false),
 
-        sinInternet = false;
+  supabase
+      .from('experiencia_magica_config')
+      .select()
+      .eq('id', 1)
+      .maybeSingle(),
+]);
 
-      });
+final lugaresResponse = results[0];
+final configResponse = results[1];
 
-      final lugaresResponse =
-    await supabase
-        .from('experiencia_magica')
-        .select()
-        .order(
-          'orden',
-          ascending: true,
-          nullsFirst: false,
-        )
-        .order(
-          'id',
-          ascending: false,
-        );
+if (!mounted) return;
 
-      final configResponse =
-          await supabase
-              .from(
-                  'experiencia_magica_config')
-              .select()
-              .eq('id', 1)
-              .maybeSingle();
+setState(() {
+  lugares = lugaresResponse as List<dynamic>;
 
-      if (!mounted) return;
+  if (categoriaSeleccionada == 'Todos') {
+    lugaresFiltrados = lugares;
+  } else {
+    lugaresFiltrados = lugares.where((e) {
+      return e['categoria'] == categoriaSeleccionada;
+    }).toList();
+  }
 
-      setState(() {
+  configuracion = (configResponse as Map<String, dynamic>?) ?? {};
 
-        lugares = lugaresResponse;
-        lugaresFiltrados = lugaresResponse;
+  categorias = [
+    'Todos',
+    ...lugares
+        .map((e) => e['categoria']?.toString() ?? '')
+        .where((e) => e.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort(),
+  ];
 
-        configuracion =
-            configResponse ?? {};
+  // ✅ Aquí debe ser false porque ya terminó la carga
+  cargando = false;
+  sinInternet = false;
+});
 
-        cargando = false;
-
-      });
+      
 
     } catch (e) {
+  if (!mounted) return;
 
-      if (!mounted) return;
-
-      setState(() {
-
-        cargando = false;
-
-        sinInternet = true;
-
-      });
-    }
+  setState(() {
+    cargando = false;
+    sinInternet = true;
+  });
+}
   }
   Future<void> eliminarLugar(dynamic item) async {
 
@@ -178,11 +197,11 @@ void filtrarCategoria(String categoria) {
   try {
 
     await supabase
-        .from('experiencia_magica')
-        .delete()
-        .eq('id', item['id']);
+    .from('experiencia_magica')
+    .delete()
+    .eq('id', item['id']);
 
-    cargarDatos();
+await cargarDatos();
 
     if (!mounted) return;
 
@@ -270,6 +289,9 @@ Future<int?> mostrarDialogoOrden(
     
     super.build(context);
     return Scaffold(
+      bottomNavigationBar: const BottomNav(
+  currentIndex: 0,
+),
 
       backgroundColor:
           Colors.white,
@@ -452,118 +474,54 @@ Future<int?> mostrarDialogoOrden(
   }
 
   Widget contenido() {
-
-    return Container(
-
-      color: Colors.white,
-
-      child:
-          SingleChildScrollView(
-
-        child: Column(
-
-          crossAxisAlignment:
-              CrossAxisAlignment
-                  .start,
-
-          children: [
-
-            portada(),
-
-            const SizedBox(
-                height: 12),
-
-            const Padding(
-  padding: EdgeInsets.symmetric(
-    horizontal: 2,
-  ),
-),
-
-            const SizedBox(
-                height: 10),
-
-                SizedBox(
-  height: 50,
-  child: ListView.builder(
-    scrollDirection: Axis.horizontal,
-    padding: const EdgeInsets.symmetric(
-      horizontal: 12,
-    ),
-    itemCount: categorias.length,
+  return ListView.builder(
+    itemCount: lugaresFiltrados.length + 2,
     itemBuilder: (context, index) {
-      final categoria = categorias[index];
+      if (index == 0) {
+        return Column(
+          children: [
+            portada(),
+            const SizedBox(height: 12),
+          ],
+        );
+      }
 
-      final seleccionada =
-          categoriaSeleccionada == categoria;
+      if (index == 1) {
+        return SizedBox(
+          height: 50,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: categorias.length,
+            itemBuilder: (context, i) {
+              final categoria = categorias[i];
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
+                  label: Text(categoria),
+                  selected:
+                      categoriaSeleccionada == categoria,
+                  onSelected: (_) {
+                    filtrarCategoria(categoria);
+                  },
+                ),
+              );
+            },
+          ),
+        );
+      }
+
+
+      final item = lugaresFiltrados[index - 2];
 
       return Padding(
-        padding: const EdgeInsets.only(
-          right: 8,
-        ),
-        child: ChoiceChip(
-  label: Text(
-    categoria,
-    style: TextStyle(
-      color: seleccionada
-          ? Colors.white
-          : Colors.black87,
-      fontWeight: FontWeight.w600,
-    ),
-  ),
-  selected: seleccionada,
-  selectedColor: const Color.fromARGB(
-    255,
-    37,
-    185,
-    230,
-  ),
-  backgroundColor: Colors.grey.shade200,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(6),
-  ),
-  onSelected: (_) {
-    filtrarCategoria(categoria);
-  },
-)
-      );
+  padding: const EdgeInsets.only(bottom: 30),
+  child: cardLugar(item),
+);
     },
-  ),
-),
-
-const SizedBox(height: 15),
-
-            ListView.builder(
-
-              shrinkWrap: true,
-
-              physics:
-                  const NeverScrollableScrollPhysics(),
-
-              padding:
-                  const EdgeInsets
-                      .symmetric(
-                horizontal: 5,
-              ),
-
-              itemCount: lugaresFiltrados.length,
-
-              itemBuilder:
-                  (context, index) {
-
-                final item = lugaresFiltrados[index];
-                return cardLugar(
-                  item,
-                );
-              },
-            ),
-
-            const SizedBox(
-                height: 40),
-          ],
-        ),
-      ),
-    );
-  }
+  );
+}
 
   Widget portada() {
 
@@ -629,6 +587,11 @@ const SizedBox(height: 15),
 }
 
   Widget cardLugar(dynamic item) {
+    final String imagen =
+    item['imagen_principal'] ??
+    (((item['imagenes'] as List?)?.isNotEmpty ?? false)
+        ? item['imagenes'][0]
+        : '');
   return Container(
     margin: const EdgeInsets.symmetric(
       horizontal: 8,
@@ -673,25 +636,25 @@ Stack(
         bottomLeft: Radius.circular(8),
       ),
       child: Image.network(
-        (item['imagenes'] != null &&
-                (item['imagenes'] as List).isNotEmpty)
-            ? item['imagenes'][0]
-            : '',
-        width: 130,
-        height: 170,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) {
-          return Container(
-            width: 130,
-            height: 170,
-            color: Colors.grey.shade300,
-            child: const Icon(
-              Icons.image,
-              size: 40,
-            ),
-          );
-        },
+  imagen,
+  width: 130,
+  height: 170,
+  fit: BoxFit.cover,
+  cacheWidth: 260,
+  cacheHeight: 340,
+  filterQuality: FilterQuality.low,
+  errorBuilder: (_, __, ___) {
+    return Container(
+      width: 130,
+      height: 170,
+      color: Colors.grey.shade300,
+      child: const Icon(
+        Icons.image,
+        size: 40,
       ),
+    );
+  },
+),
     ),
 
     if (esAdmin)

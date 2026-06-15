@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../tienda_hidarte_page.dart';
 import '../servicios_emergencia_page.dart';
 import 'admin_experiencia_magica_page.dart';
+import '/widgets/bottom_nav.dart';
 
 class AdminHomePage extends StatelessWidget {
   const AdminHomePage({super.key});
@@ -12,6 +13,9 @@ class AdminHomePage extends StatelessWidget {
     final user = Supabase.instance.client.auth.currentUser;
 
     return Scaffold(
+      bottomNavigationBar: const BottomNav(
+  currentIndex: 0,
+),
       appBar: AppBar(
         title: const Text("Panel Administrador"),
         actions: const [
