@@ -277,9 +277,6 @@ String normalizarNombre(String nombre) {
     if (mounted) setState(() => loading = false);
   }
 }
-
-
-  // =========================
   // UI
   // =========================
 

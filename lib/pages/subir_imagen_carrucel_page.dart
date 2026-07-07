@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../supabase/supabase_client.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_compress/video_compress.dart';
 
 class SubirImagenCarrucelPage extends StatefulWidget {
   const SubirImagenCarrucelPage({super.key});
@@ -60,6 +61,22 @@ class _SubirImagenCarrucelPageState
       _videoController = controller;
     });
   }
+  Future<File> comprimirVideo(File videoOriginal) async {
+    debugPrint("🎥 Comprimiendo video...");
+  final info = await VideoCompress.compressVideo(
+    videoOriginal.path,
+    quality: VideoQuality.DefaultQuality,
+    deleteOrigin: false,
+    includeAudio: true,
+  );
+  debugPrint("✅ Video comprimido");
+
+  if (info == null || info.file == null) {
+    throw Exception("No se pudo comprimir el video");
+  }
+
+  return info.file!;
+}
 
   // SUBIR A SUPABASE STORAGE + BD
   Future<void> subirImagen() async {
@@ -83,7 +100,13 @@ class _SubirImagenCarrucelPageState
       final nombreArchivo =
           'carrusel_${DateTime.now().millisecondsSinceEpoch}.$extension';
 
-      final archivo = esVideo ? video! : imagen!;
+      File archivo;
+
+if (esVideo) {
+  archivo = await comprimirVideo(video!);
+} else {
+  archivo = imagen!;
+}
 
       await SupabaseConfig.client.storage
           .from('carrusel')
@@ -104,6 +127,9 @@ class _SubirImagenCarrucelPageState
   'es_video': esVideo,
   'mime_type': esVideo ? 'video/mp4' : 'image/jpeg',
 });
+ if (esVideo) {
+  await VideoCompress.deleteAllCache();
+}
 
 
       if (!mounted) return;
@@ -122,6 +148,7 @@ class _SubirImagenCarrucelPageState
       if (mounted) setState(() => subiendo = false);
     }
   }
+  
 
   @override
   void dispose() {

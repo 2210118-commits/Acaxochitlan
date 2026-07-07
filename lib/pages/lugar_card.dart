@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'lugares_detalle_por_tipo_page.dart';
 import 'detalle_festividad_page.dart';
 import 'actividades_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LugarCard extends StatelessWidget {
 
@@ -59,11 +60,10 @@ class LugarCard extends StatelessWidget {
 
   } else if (lugar["origen"] == "actividades") {
 
-    /// 👉 puedes abrir la misma pantalla o crear una nueva
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ActividadesPage(), // o detalle si haces uno
+        builder: (_) => const ActividadesPage(),
       ),
     );
 
@@ -79,7 +79,6 @@ class LugarCard extends StatelessWidget {
     );
   }
 },
-
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

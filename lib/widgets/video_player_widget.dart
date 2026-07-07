@@ -48,8 +48,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget>
       final uint8list = await VideoThumbnail.thumbnailData(
         video: widget.videoUrl,
         imageFormat: ImageFormat.JPEG,
-        maxWidth: 500,
-        quality: 75,
+        maxWidth: 320,
+        quality: 55,
       );
 
       if (uint8list != null) {

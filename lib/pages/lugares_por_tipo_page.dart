@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'EditarLugarPage.dart';
 import 'favoritos_service.dart';
 import '../widgets/bottom_nav.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class LugaresPorTipoPage extends StatefulWidget {
   final String tipo; // 'hotel' o 'cabana'
@@ -17,6 +18,9 @@ class LugaresPorTipoPage extends StatefulWidget {
 
   @override
   State<LugaresPorTipoPage> createState() => _LugaresPorTipoPageState();
+}
+String imagenOptimizada(String url) {
+  return '$url?width=500&quality=70';
 }
 
 class _LugaresPorTipoPageState extends State<LugaresPorTipoPage> {
@@ -267,22 +271,32 @@ return ListView.builder(
                 height: 220,
                 child: (l['imagen_principal'] != null &&
                         l['imagen_principal'].toString().isNotEmpty)
-                    ? Image.network(
-                        l['imagen_principal'],
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.grey[300],
-                            child: const Center(
-                              child: Icon(
-                                Icons.image_not_supported,
-                                size: 50,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          );
-                        },
-                      )
+                    ? CachedNetworkImage(
+  imageUrl: imagenOptimizada(
+    l['imagen_principal'],
+  ),
+  fit: BoxFit.cover,
+
+  memCacheWidth: 500,
+  maxWidthDiskCache: 500,
+
+  placeholder: (context, url) =>
+      const Center(
+        child: CircularProgressIndicator(),
+      ),
+
+  errorWidget: (context, url, error) =>
+      Container(
+        color: Colors.grey[300],
+        child: const Center(
+          child: Icon(
+            Icons.image_not_supported,
+            size: 50,
+            color: Colors.grey,
+          ),
+        ),
+      ),
+)
                     : Container(
                         color: Colors.grey[300],
                         child: const Center(

@@ -52,7 +52,7 @@ class _NoticiasHomeSectionState
 
   Widget _cardNoticia(Map noticia) {
   return InkWell(
-    borderRadius: BorderRadius.circular(5),
+    borderRadius: BorderRadius.circular(24),
     onTap: () {
       Navigator.push(
         context,
@@ -64,178 +64,136 @@ class _NoticiasHomeSectionState
       );
     },
     child: Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(right: 18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
+            color: Colors.black.withOpacity(.15),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(3),
-            ),
-            child: Image.network(
-              noticia['imagen'] ?? '',
-              height: 160,
-              width: double.infinity,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+
+            /// FOTO
+            Image.network(
+              noticia["imagen"] ?? "",
               fit: BoxFit.cover,
             ),
-          ),
 
-          Padding(
-            padding: const EdgeInsets.all(5),
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding:
-                          const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7A003C),
-                        borderRadius:
-                            BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        noticia['categoria'] ??
-                            'NOTICIAS',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight:
-                              FontWeight.bold,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 6),
-
-                    Expanded(
-                      child: Text(
-                        noticia['fecha']
-                            .toString()
-                            .substring(0, 10),
-                        textAlign: TextAlign.end,
-                        style: const TextStyle(
-                          color: Color.fromARGB(255, 17, 17, 17),
-                          fontWeight:
-                              FontWeight.w600,
-                        ),
-                      ),
-                    ),
+            /// DEGRADADO
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(.85),
                   ],
                 ),
-
-                const SizedBox(height: 5),
-
-                Text(
-                  noticia['titulo'] ?? '',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight:
-                        FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 3),
-
-                Text(
-                  noticia['descripcion'] ?? '',
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
-                    height: 1.4,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+
+            /// TEXTO
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: 22,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  Text(
+                    noticia["titulo"] ?? "",
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    noticia["descripcion"] ?? "",
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  const Row(
+                    children: [
+
+                      Text(
+                        "Ver más",
+                        style: TextStyle(
+                          color: Color(0xffD8A72C),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+
+                      SizedBox(width: 6),
+
+                      Icon(
+                        Icons.arrow_forward,
+                        color: Color(0xffD8A72C),
+                        size: 18,
+                      )
+
+                    ],
+                  )
+
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     ),
   );
 }
 
   @override
-  Widget build(BuildContext context) {
-    if (cargando) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(30),
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    return Container(
-      width: double.infinity,
-      padding:
-          const EdgeInsets.symmetric(horizontal: 2),
-      decoration: BoxDecoration(
-  color: Colors.transparent,
-  borderRadius: const BorderRadius.vertical(
-    top: Radius.circular(30),
-  ),
-),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 30),
-
-          Center(
-  child: Container(
-    padding: const EdgeInsets.symmetric(
-      horizontal: 28,
-      vertical: 12,
-    ),
-    decoration: BoxDecoration(
-      color: const Color(0xFF7A003C),
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.20),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: const Text(
-      "LUGARES MAGICOS",
-      style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-        letterSpacing: 0.5,
-      ),
-    ),
-  ),
-),
-
-          const SizedBox(height: 20),
-
-          ...noticias.map(
-            (n) => _cardNoticia(n),
-          ),
-
-          const SizedBox(height: 40),
-        ],
-      ),
+Widget build(BuildContext context) {
+  if (cargando) {
+    return const Center(
+      child: CircularProgressIndicator(),
     );
   }
+
+  return SizedBox(
+    height: 330,
+
+    child: ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      scrollDirection: Axis.horizontal,
+      itemCount: noticias.length,
+
+      itemBuilder: (context, index) {
+        final noticia = noticias[index];
+
+        return SizedBox(
+          width: 320,
+          child: _cardNoticia(noticia),
+        );
+      },
+    ),
+  );
+}
 }

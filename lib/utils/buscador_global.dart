@@ -2,35 +2,87 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BuscadorGlobal {
 
+  static bool _cacheCargado = false;
+
+  static List<Map<String, dynamic>> _lugares = [];
+  static List<Map<String, dynamic>> _festividades = [];
+  static List<Map<String, dynamic>> _actividades = [];
+  
+  static Future<void> _cargarCache() async {
+
+  if (_cacheCargado) return;
+
+  final client = Supabase.instance.client;
+
+  final results = await Future.wait([
+
+    client
+    .from('lugares')
+    .select('''
+      id,
+      nombre,
+      descripcion,
+      tipo,
+      imagen_principal,
+      platillos
+    '''),
+
+    client
+        .from('festividades')
+        .select('''
+          id,
+          titulo,
+          descripcion,
+          imagenes,
+          videos,
+          fecha_inicio,
+          fecha_fin
+        '''),
+
+    client
+        .from('publicaciones')
+        .select('''
+          id,
+          titulo,
+          descripcion,
+          videos,
+          imagenes
+        '''),
+  ]);
+
+  _lugares = List<Map<String, dynamic>>.from(results[0]);
+  _festividades = List<Map<String, dynamic>>.from(results[1]);
+  _actividades = List<Map<String, dynamic>>.from(results[2]);
+
+  _cacheCargado = true;
+} 
   static Future<List<Map<String, dynamic>>> buscar(String texto) async {
 
     final query = texto.trim().toLowerCase();
 
-    if (query.isEmpty) return [];
-
-    final client = Supabase.instance.client;
+    if (query.length < 2) return [];
 
     try {
 
-      final response = await client
-          .from('lugares')
-          .select()
-          .limit(100);
+    await _cargarCache();
 
-      final responseFestividades = await client
-    .from('festividades')
-    .select()
-    .limit(100);
+    print("Lugares: ${_lugares.length}");
+print("Festividades: ${_festividades.length}");
+print("Actividades: ${_actividades.length}");
 
-    final responseActividades = await client
-    .from('publicaciones')
-    .select()
-    .limit(100);
+    final response = _lugares;
+
+    final responseFestividades = _festividades;
+
+    final responseActividades = _actividades;
 
       List<Map<String, dynamic>> resultados = [];
 
       /// separar palabras de la frase
-      List<String> palabras = query.split(" ");
+      final palabras = query
+    .split(" ")
+    .where((p) => p.trim().isNotEmpty)
+    .toList();
 
       /// detectar intención
       String? filtroTipo;
@@ -101,14 +153,32 @@ class BuscadorGlobal {
         }
 
         /// buscar cada palabra dentro del lugar
-        for (String palabra in palabras) {
+        /// Buscar por nombre, descripción, platillos y tipo
+for (final palabra in palabras) {
 
-          if (nombre.contains(palabra)) score += 5;
+  if (nombre.contains(palabra)) {
+    score += 5;
+  }
 
-          if (descripcion.contains(palabra)) score += 3;
+  if (descripcion.contains(palabra)) {
+    score += 3;
+  }
 
-          if (platillos.contains(palabra)) score += 2;
-        }
+  if (platillos.contains(palabra)) {
+    score += 2;
+  }
+
+  // También permitir buscar directamente por el tipo
+  if (tipo.contains(palabra)) {
+    score += 4;
+  }
+}
+
+// Si el usuario escribió "restaurante", "hotel", etc. y coincide el tipo,
+// darle prioridad.
+if (filtroTipo != null && tipo == filtroTipo) {
+  score += 10;
+}
 
         if (score > 0) {
 
@@ -134,25 +204,10 @@ class BuscadorGlobal {
 
   final data = Map<String, dynamic>.from(item);
 
-  final titulo = (data["titulo"] ?? "").toString().toLowerCase();
-  final descripcion = (data["descripcion"] ?? "").toString().toLowerCase();
-
-  final imagenes = (data["imagenes"] as List?)
-      ?.where((e) => e != null && e.toString().isNotEmpty)
-      .toList();
-
-  final videos = (data["videos"] as List?)
-      ?.where((e) => e != null && e.toString().isNotEmpty)
-      .toList();
-
-  /// 🔥 MISMA LOGICA INTELIGENTE
-  String imagenPrincipal = "";
-
-  if (imagenes != null && imagenes.isNotEmpty) {
-    imagenPrincipal = imagenes.first.toString();
-  } else if (videos != null && videos.isNotEmpty) {
-    imagenPrincipal = videos.first.toString();
-  }
+final imagenes = data["imagenes"] as List? ?? [];
+final videos = data["videos"] as List? ?? [];
+final titulo = (data["titulo"] ?? "").toString().toLowerCase();
+final descripcion = (data["descripcion"] ?? "").toString().toLowerCase();
 
   int score = 0;
 
@@ -170,15 +225,18 @@ class BuscadorGlobal {
     resultados.add({
       ...data,
 
-      "imagen_principal": imagenPrincipal,
-      "es_video": (imagenes == null || imagenes.isEmpty) &&
-            (videos != null && videos.isNotEmpty),
-      "nombre": data["titulo"] ?? "",
-      "titulo": data["titulo"] ?? "",
-      "descripcion": data["descripcion"] ?? "",
+"imagen_principal":
+    imagenes.isNotEmpty
+        ? imagenes.first
+        : (videos.isNotEmpty ? videos.first : ""),
 
-      "imagenes": imagenes ?? [],
-      "videos": videos ?? [],
+"es_video":
+    imagenes.isEmpty && videos.isNotEmpty,
+
+"nombre": data["titulo"] ?? "",
+"titulo": data["titulo"] ?? "",
+"descripcion": data["descripcion"] ?? "",
+
 
       "fecha_inicio": data["fecha_inicio"] ?? "",
       "fecha_fin": data["fecha_fin"] ?? "",
@@ -194,25 +252,10 @@ for (final item in responseActividades) {
 
   final data = Map<String, dynamic>.from(item);
 
-  final titulo = (data["titulo"] ?? "").toString().toLowerCase();
-  final descripcion = (data["descripcion"] ?? "").toString().toLowerCase();
-
-  final imagenes = (data["imagenes"] as List?)
-      ?.where((e) => e != null && e.toString().isNotEmpty)
-      .toList();
-
-  final videos = (data["videos"] as List?)
-      ?.where((e) => e != null && e.toString().isNotEmpty)
-      .toList();
-
-  /// 🔥 LOGICA INTELIGENTE
-  String imagenPrincipal = "";
-
-  if (imagenes != null && imagenes.isNotEmpty) {
-    imagenPrincipal = imagenes.first.toString();
-  } else if (videos != null && videos.isNotEmpty) {
-    imagenPrincipal = videos.first.toString(); // 👈 video como fallback
-  }
+final imagenes = data["imagenes"] as List? ?? [];
+final videos = data["videos"] as List? ?? [];
+final titulo = (data["titulo"] ?? "").toString().toLowerCase();
+final descripcion = (data["descripcion"] ?? "").toString().toLowerCase();
 
   int score = 0;
 
@@ -230,15 +273,17 @@ for (final item in responseActividades) {
     resultados.add({
       ...data,
 
-      "imagen_principal": imagenPrincipal,
-      "es_video": (imagenes == null || imagenes.isEmpty) &&
-            (videos != null && videos.isNotEmpty),
-      "nombre": data["titulo"] ?? "",
-      "titulo": data["titulo"] ?? "",
-      "descripcion": data["descripcion"] ?? "",
+"imagen_principal":
+    imagenes.isNotEmpty
+        ? imagenes.first
+        : (videos.isNotEmpty ? videos.first : ""),
 
-      "imagenes": imagenes ?? [],
-      "videos": videos ?? [],
+"es_video":
+    imagenes.isEmpty && videos.isNotEmpty,
+
+"nombre": data["titulo"] ?? "",
+"titulo": data["titulo"] ?? "",
+"descripcion": data["descripcion"] ?? "",
 
       "categoria": "🎯 Actividad",
       "origen": "actividades",
@@ -252,7 +297,7 @@ for (final item in responseActividades) {
         (a, b) => (b["score"] as int).compareTo(a["score"] as int),
       );
 
-      return resultados;
+      return resultados.take(20).toList();
 
     } catch (e) {
 
@@ -261,4 +306,10 @@ for (final item in responseActividades) {
       return [];
     }
   }
+  static void limpiarCache() {
+  _cacheCargado = false;
+  _lugares.clear();
+  _festividades.clear();
+  _actividades.clear();
+}
 }
