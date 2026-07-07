@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../supabase/supabase_client.dart';
 import 'package:video_player/video_player.dart';
-import 'package:video_compress/video_compress.dart';
+//import 'package:video_compress/video_compress.dart';
 
 class SubirImagenCarrucelPage extends StatefulWidget {
   const SubirImagenCarrucelPage({super.key});
@@ -62,20 +62,7 @@ class _SubirImagenCarrucelPageState
     });
   }
   Future<File> comprimirVideo(File videoOriginal) async {
-    debugPrint("🎥 Comprimiendo video...");
-  final info = await VideoCompress.compressVideo(
-    videoOriginal.path,
-    quality: VideoQuality.DefaultQuality,
-    deleteOrigin: false,
-    includeAudio: true,
-  );
-  debugPrint("✅ Video comprimido");
-
-  if (info == null || info.file == null) {
-    throw Exception("No se pudo comprimir el video");
-  }
-
-  return info.file!;
+  return videoOriginal;
 }
 
   // SUBIR A SUPABASE STORAGE + BD
@@ -127,9 +114,6 @@ if (esVideo) {
   'es_video': esVideo,
   'mime_type': esVideo ? 'video/mp4' : 'image/jpeg',
 });
- if (esVideo) {
-  await VideoCompress.deleteAllCache();
-}
 
 
       if (!mounted) return;
