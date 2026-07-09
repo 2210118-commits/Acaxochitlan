@@ -47,7 +47,7 @@ class HomeNews extends StatelessWidget {
                       width: 60,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: const Color(0xffD8A72C),
+                        color: const Color.fromARGB(255, 173, 42, 42),
                         borderRadius:
                             BorderRadius.circular(20),
                       ),
@@ -71,10 +71,10 @@ class HomeNews extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 8),
 
           SizedBox(
-            height: 160,
+            height: 60,
             child: noticias,
           ),
 

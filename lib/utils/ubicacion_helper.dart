@@ -2,40 +2,37 @@ import 'package:geolocator/geolocator.dart';
 
 class UbicacionHelper {
   static Future<bool> solicitarPermisoUbicacion() async {
-    // Revisar permiso
-    LocationPermission permiso =
-        await Geolocator.checkPermission();
-
-    // Pedir permiso nativo
-    if (permiso == LocationPermission.denied) {
-      permiso = await Geolocator.requestPermission();
-    }
-
-    // Rechazado
-    if (permiso == LocationPermission.denied) {
-      return false;
-    }
-
-    // Bloqueado permanentemente
-    if (permiso == LocationPermission.deniedForever) {
-      await Geolocator.openAppSettings();
-      return false;
-    }
-
-    // Revisar GPS
-    bool gpsActivo =
-        await Geolocator.isLocationServiceEnabled();
+    // Verificar si el GPS está activado
+    bool gpsActivo = await Geolocator.isLocationServiceEnabled();
 
     if (!gpsActivo) {
       await Geolocator.openLocationSettings();
 
-      // volver a revisar al regresar
-      gpsActivo =
-          await Geolocator.isLocationServiceEnabled();
+      gpsActivo = await Geolocator.isLocationServiceEnabled();
 
       if (!gpsActivo) {
         return false;
       }
+    }
+
+    // Revisar permiso actual
+    LocationPermission permiso =
+        await Geolocator.checkPermission();
+
+    // Solicitar permiso si aún no está concedido
+    if (permiso == LocationPermission.denied) {
+      permiso = await Geolocator.requestPermission();
+    }
+
+    // Usuario rechazó el permiso
+    if (permiso == LocationPermission.denied) {
+      return false;
+    }
+
+    // Usuario rechazó permanentemente
+    if (permiso == LocationPermission.deniedForever) {
+      await Geolocator.openAppSettings();
+      return false;
     }
 
     return true;

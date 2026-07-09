@@ -21,7 +21,7 @@ class HomeHeader extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: SizedBox(
-          height: 55,
+          height: 45,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(

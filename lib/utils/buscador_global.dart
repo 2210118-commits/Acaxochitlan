@@ -16,16 +16,15 @@ class BuscadorGlobal {
 
   final results = await Future.wait([
 
-    client
-    .from('lugares')
-    .select('''
-      id,
-      nombre,
-      descripcion,
-      tipo,
-      imagen_principal,
-      platillos
-    '''),
+    client.from('lugares').select('''
+  id,
+  nombre,
+  descripcion,
+  tipo,
+  imagen_principal,
+  precio,
+  platillos
+'''),
 
     client
         .from('festividades')

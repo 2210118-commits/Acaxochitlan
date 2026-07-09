@@ -45,7 +45,7 @@ class LugarCard extends StatelessWidget {
 
           child: InkWell(
 
-            onTap: () {
+            onTap: () async {
 
   if (lugar["origen"] == "festividades") {
 
@@ -69,14 +69,22 @@ class LugarCard extends StatelessWidget {
 
   } else {
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => LugaresDetallePorTipoPage(
-          lugar: lugar,
-        ),
-      ),
-    );
+    final lugarCompleto = await Supabase.instance.client
+    .from('lugares')
+    .select()
+    .eq('id', lugar['id'])
+    .single();
+
+if (!context.mounted) return;
+
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => LugaresDetallePorTipoPage(
+      lugar: lugarCompleto,
+    ),
+  ),
+);
   }
 },
             child: Column(

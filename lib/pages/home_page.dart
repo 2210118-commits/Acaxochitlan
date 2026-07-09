@@ -5,6 +5,8 @@ import '../../supabase/supabase_client.dart';
 import '../main.dart';
 
 import '../utils/buscador_global.dart';
+import '../utils/ubicacion_helper.dart';
+
 
 import '../widgets/bottom_nav.dart';
 import '../widgets/carrusel_supabase.dart';
@@ -355,7 +357,15 @@ HomeButtons(
       ),
     );
   },
-  onCercaDeMi: () {
+  onCercaDeMi: () async {
+
+    final permitido =
+        await UbicacionHelper.solicitarPermisoUbicacion();
+
+    if (!permitido) return;
+
+    if (!context.mounted) return;
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -384,7 +394,7 @@ Padding(
   ),
 ),
 
-const SizedBox(height: 30),
+const SizedBox(height: 1),
 
 /// =====================================================
 /// TITULO
@@ -401,7 +411,7 @@ Padding(
       const Text(
         "Lugares que no te puedes perder",
         style: TextStyle(
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -425,13 +435,13 @@ Padding(
   ),
 ),
 
-const SizedBox(height: 5),
+const SizedBox(height: 2),
 
 /// =====================================================
 /// NOTICIAS
 const NoticiasHomeSection(),
 
-const SizedBox(height: 35),
+const SizedBox(height: 10),
 
               ],
               ],

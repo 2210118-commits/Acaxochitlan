@@ -22,7 +22,7 @@ class HomeHero extends StatelessWidget {
 
         /// HERO
         SizedBox(
-          height: 250,
+          height: 230,
           width: double.infinity,
           child: Stack(
             fit: StackFit.expand,
@@ -135,7 +135,7 @@ class HomeHero extends StatelessWidget {
           child: Material(
             elevation: 15,
             borderRadius:
-                BorderRadius.circular(5),
+                BorderRadius.circular(15),
             child: Container(
               height: 46,
               decoration: BoxDecoration(
@@ -155,7 +155,7 @@ class HomeHero extends StatelessWidget {
 
     prefixIcon: const Icon(
       Icons.search,
-      color: Colors.grey,
+      color: Color.fromARGB(255, 122, 122, 122),
       size: 22,
     ),
 
@@ -173,7 +173,7 @@ class HomeHero extends StatelessWidget {
 
     hintStyle: const TextStyle(
       fontSize: 14,
-      color: Colors.grey,
+      color: Color.fromARGB(255, 102, 101, 101),
     ),
 
     isDense: true,

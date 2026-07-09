@@ -116,7 +116,7 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SizedBox(
-            height: 250,
+            height: 160,
             child: Center(
               child: CircularProgressIndicator(),
             ),
@@ -125,7 +125,7 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
 
         if (snapshot.hasError) {
           return const SizedBox(
-            height: 250,
+            height: 160,
             child: Center(
               child: Text("Error cargando carrusel"),
             ),
@@ -136,7 +136,7 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
 
         if (items.isEmpty) {
           return Container(
-            height: 250,
+            height: 160,
             margin: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
               color: Colors.grey[300],
@@ -158,12 +158,12 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
             CarouselSlider(
               carouselController: _carouselController,
               options: CarouselOptions(
-                height: 250,
+                height: 160,
                 autoPlay: !(items[_currentIndex]['es_video'] == true),
                 autoPlayInterval: const Duration(seconds: 4),
                 autoPlayAnimationDuration: const Duration(milliseconds: 800),
                 enlargeCenterPage: true,
-                viewportFraction: 0.9,
+                viewportFraction: 0.90,
                 onPageChanged: (index, reason) {
                   setState(() {
                     _currentIndex = index;
@@ -272,7 +272,7 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
                 );
               }).toList(),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: items.asMap().entries.map((entry) {
@@ -289,7 +289,7 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: _currentIndex == entry.key
-                          ? Colors.blueAccent
+                          ? const Color.fromARGB(255, 141, 8, 26)
                           : Colors.grey,
                     ),
                   ),
@@ -422,7 +422,7 @@ class _VideoCarruselItemState extends State<VideoCarruselItem>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // 👈 AGREGA ESTO
+    WidgetsBinding.instance.addObserver(this); 
     _initVideo();
   }
 

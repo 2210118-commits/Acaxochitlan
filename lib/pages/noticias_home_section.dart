@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'noticia_detalle_page.dart';
+import '../utils/noticias_cache.dart';
 
 class NoticiasHomeSection extends StatefulWidget {
   const NoticiasHomeSection({super.key});
@@ -14,7 +15,7 @@ class _NoticiasHomeSectionState
     extends State<NoticiasHomeSection> {
   List<dynamic> noticias = [];
   bool cargando = true;
-
+  
   @override
   void initState() {
     super.initState();
@@ -22,25 +23,32 @@ class _NoticiasHomeSectionState
   }
 
   Future<void> cargarNoticias() async {
-  try {
-    print("🚀 CONSULTANDO NOTICIAS");
 
+  if (NoticiasCache.noticias != null) {
+    setState(() {
+      noticias = NoticiasCache.noticias!;
+      cargando = false;
+    });
+    return;
+  }
+
+  try {
     final response = await Supabase.instance.client
         .from('noticias')
         .select()
         .order('fecha', ascending: false)
         .limit(5);
 
-    print("🔥 NOTICIAS: $response");
-
     if (!mounted) return;
+
+    NoticiasCache.noticias = response;
 
     setState(() {
       noticias = response;
       cargando = false;
     });
+
   } catch (e) {
-    print("❌ ERROR NOTICIAS: $e");
 
     if (!mounted) return;
 
@@ -49,10 +57,9 @@ class _NoticiasHomeSectionState
     });
   }
 }
-
   Widget _cardNoticia(Map noticia) {
   return InkWell(
-    borderRadius: BorderRadius.circular(24),
+    borderRadius: BorderRadius.circular(8),
     onTap: () {
       Navigator.push(
         context,
@@ -64,9 +71,9 @@ class _NoticiasHomeSectionState
       );
     },
     child: Container(
-      margin: const EdgeInsets.only(right: 18),
+      margin: const EdgeInsets.only(right: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(.15),
@@ -76,7 +83,7 @@ class _NoticiasHomeSectionState
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(8),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -95,7 +102,7 @@ class _NoticiasHomeSectionState
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(.85),
+                    Colors.black.withOpacity(.55),
                   ],
                 ),
               ),
@@ -103,9 +110,9 @@ class _NoticiasHomeSectionState
 
             /// TEXTO
             Positioned(
-              left: 20,
-              right: 20,
-              bottom: 22,
+              left: 2,
+              right: 2,
+              bottom: 2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -116,12 +123,12 @@ class _NoticiasHomeSectionState
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 22,
+                      fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 3),
 
                   Text(
                     noticia["descripcion"] ?? "",
@@ -129,12 +136,13 @@ class _NoticiasHomeSectionState
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Colors.white70,
-                      fontSize: 14,
-                      height: 1.4,
+                      fontSize: 10,
+                      height: .9,
                     ),
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 3),
+                  SizedBox(width: 10),
 
                   const Row(
                     children: [
@@ -142,9 +150,9 @@ class _NoticiasHomeSectionState
                       Text(
                         "Ver más",
                         style: TextStyle(
-                          color: Color(0xffD8A72C),
+                          color: Color.fromARGB(255, 243, 212, 34),
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 11,
                         ),
                       ),
 
@@ -152,8 +160,8 @@ class _NoticiasHomeSectionState
 
                       Icon(
                         Icons.arrow_forward,
-                        color: Color(0xffD8A72C),
-                        size: 18,
+                        color: Color.fromARGB(255, 243, 212, 34),
+                        size: 16,
                       )
 
                     ],
@@ -178,7 +186,7 @@ Widget build(BuildContext context) {
   }
 
   return SizedBox(
-    height: 330,
+    height: 120,//ALTURA DEL CARDNOTICIAS
 
     child: ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -187,9 +195,9 @@ Widget build(BuildContext context) {
 
       itemBuilder: (context, index) {
         final noticia = noticias[index];
-
+//ANCHO DEL CARD NOTICIAS
         return SizedBox(
-          width: 320,
+          width: 120,
           child: _cardNoticia(noticia),
         );
       },

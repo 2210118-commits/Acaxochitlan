@@ -28,7 +28,7 @@ class BottomNav extends StatelessWidget {
       unselectedItemColor: Colors.grey,
       selectedFontSize: 11,
       unselectedFontSize: 11,
-      iconSize: 20,
+      iconSize: 18,
 
       showSelectedLabels: true,
       showUnselectedLabels: true,

@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'lugares_detalle_por_tipo_page.dart';
+import '../utils/ubicacion_helper.dart';
 
 class CercaDeMiPage extends StatefulWidget {
   const CercaDeMiPage({super.key});
@@ -36,59 +37,86 @@ class _CercaDeMiPageState extends State<CercaDeMiPage> {
   }
 
   Future<void> _cargarLugaresCercanos() async {
-    setState(() {
-      cargando = true;
-    });
+  setState(() {
+    cargando = true;
+  });
 
-    try {
-      final posicion = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium,
-      );
+  try {
+    // Solicitar permiso de ubicación
+    final permitido =
+        await UbicacionHelper.solicitarPermisoUbicacion();
 
-      final response =
-          await Supabase.instance.client.from('lugares').select();
+    if (!permitido) {
+      if (!mounted) return;
 
-      List<Map<String, dynamic>> lugaresConDistancia = [];
+      setState(() {
+        cargando = false;
+      });
 
-      for (var lugar in response) {
-        if (lugar['latitud'] == null || lugar['longitud'] == null) continue;
+      return;
+    }
 
-        final distancia = Geolocator.distanceBetween(
-          posicion.latitude,
-          posicion.longitude,
-          double.parse(lugar['latitud'].toString()),
-          double.parse(lugar['longitud'].toString()),
-        );
+    // Obtener ubicación actual
+    final posicion = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.medium,
+    );
 
-        lugar['distancia'] = distancia;
-        lugaresConDistancia.add(Map<String, dynamic>.from(lugar));
+    // Obtener lugares desde Supabase
+    final response = await Supabase.instance.client
+        .from('lugares')
+        .select();
+
+    List<Map<String, dynamic>> lugaresConDistancia = [];
+
+    for (var lugar in response) {
+      if (lugar['latitud'] == null ||
+          lugar['longitud'] == null) {
+        continue;
       }
 
-      lugaresConDistancia.sort(
-        (a, b) => a['distancia'].compareTo(b['distancia']),
+      final distancia = Geolocator.distanceBetween(
+        posicion.latitude,
+        posicion.longitude,
+        double.parse(lugar['latitud'].toString()),
+        double.parse(lugar['longitud'].toString()),
       );
 
-      if (!mounted) return;
+      lugar['distancia'] = distancia;
 
-      setState(() {
-        lugares = lugaresConDistancia;
-        _aplicarFiltro();
-        cargando = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        cargando = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error obteniendo ubicación: $e'),
-        ),
+      lugaresConDistancia.add(
+        Map<String, dynamic>.from(lugar),
       );
     }
+
+    lugaresConDistancia.sort(
+      (a, b) => a['distancia'].compareTo(
+        b['distancia'],
+      ),
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      lugares = lugaresConDistancia;
+      _aplicarFiltro();
+      cargando = false;
+    });
+  } catch (e) {
+    if (!mounted) return;
+
+    setState(() {
+      cargando = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Error obteniendo ubicación: $e',
+        ),
+      ),
+    );
   }
+}
 
   void _aplicarFiltro() {
     if (filtroActual == 'todos') {
@@ -293,7 +321,7 @@ Positioned(
         l['nombre'] ?? '',
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 24,
+          fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -329,16 +357,16 @@ Positioned(
       children: [
         Icon(
           Icons.visibility,
-          size: 15,
+          size: 14,
           color: Color(0xFF1F2937),
         ),
         SizedBox(width: 6),
         Text(
-          "Detalle",
+          "Ver detalle",
           style: TextStyle(
             color: Color(0xFF1F2937),
             fontWeight: FontWeight.bold,
-            fontSize: 13,
+            fontSize: 12,
           ),
         ),
       ],
