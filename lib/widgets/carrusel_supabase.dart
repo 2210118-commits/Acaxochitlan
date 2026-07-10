@@ -111,12 +111,15 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final double alturaCarrusel =
+    (size.height * 0.24).clamp(140.0, 230.0);
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: _imagenesFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(
-            height: 160,
+          return SizedBox(
+    height: alturaCarrusel,
             child: Center(
               child: CircularProgressIndicator(),
             ),
@@ -124,8 +127,8 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
         }
 
         if (snapshot.hasError) {
-          return const SizedBox(
-            height: 160,
+          return SizedBox(
+    height: alturaCarrusel,
             child: Center(
               child: Text("Error cargando carrusel"),
             ),
@@ -136,7 +139,7 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
 
         if (items.isEmpty) {
           return Container(
-            height: 160,
+            height: alturaCarrusel,
             margin: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
               color: Colors.grey[300],
@@ -158,7 +161,7 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
             CarouselSlider(
               carouselController: _carouselController,
               options: CarouselOptions(
-                height: 160,
+                height: alturaCarrusel,
                 autoPlay: !(items[_currentIndex]['es_video'] == true),
                 autoPlayInterval: const Duration(seconds: 4),
                 autoPlayAnimationDuration: const Duration(milliseconds: 800),
@@ -201,7 +204,7 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
                               child: CachedNetworkImage(
                                 cacheManager: CustomCacheManager.instance,
                                 imageUrl: imageUrl,
-                                height: 230,
+                                height: alturaCarrusel,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                                 fadeInDuration:
@@ -462,6 +465,10 @@ class _VideoCarruselItemState extends State<VideoCarruselItem>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+final alturaCarrusel =
+    (size.height * 0.24).clamp(160.0, 230.0);
     if (_controller == null || !_controller!.value.isInitialized) {
       return const Center(
         child: CircularProgressIndicator(strokeWidth: 2),
@@ -485,7 +492,7 @@ class _VideoCarruselItemState extends State<VideoCarruselItem>
       child: GestureDetector(
         onTap: _abrirVideoFullscreen,
         child: SizedBox(
-          height: 230,
+          height: alturaCarrusel,
           width: double.infinity,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),

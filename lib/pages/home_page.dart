@@ -197,6 +197,7 @@ void initState() {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
 
@@ -239,7 +240,6 @@ void initState() {
       ),
 
       body: Column(
-
         children: [
 
           Builder(
@@ -308,7 +308,9 @@ HomeHero(
   onSearch: buscarLugares,
 ),
 
-const SizedBox(height: 35),
+SizedBox(
+  height: MediaQuery.of(context).size.height * 0.03,
+),
 
 if (buscando || resultadosBusqueda.isNotEmpty || _searchController.text.isNotEmpty) ...[
 
@@ -376,15 +378,17 @@ HomeButtons(
 ),
 
 
-const SizedBox(height: 5),
+SizedBox(
+  height: MediaQuery.of(context).size.height * 0.008,
+),
 
 /// =====================================================
 /// CARRUSEL PRINCIPAL
 /// =====================================================
 Padding(
-  padding: const EdgeInsets.symmetric(
-    horizontal: 5,
-  ),
+  padding: EdgeInsets.symmetric(
+  horizontal: MediaQuery.of(context).size.width * 0.015,
+),
   child: ClipRRect(
     borderRadius: BorderRadius.circular(24),
     child: CarruselSupabase(
@@ -394,27 +398,29 @@ Padding(
   ),
 ),
 
-const SizedBox(height: 1),
+SizedBox(
+  height: MediaQuery.of(context).size.height * 0.002,
+),
 
 /// =====================================================
 /// TITULO
 /// =====================================================
 Padding(
-  padding: const EdgeInsets.symmetric(
-    horizontal: 20,
-  ),
+  padding: EdgeInsets.symmetric(
+  horizontal: MediaQuery.of(context).size.width * 0.05,
+),
   child: Row(
     mainAxisAlignment:
         MainAxisAlignment.spaceBetween,
     children: [
 
-      const Text(
-        "Lugares que no te puedes perder",
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+      Text(
+  "Lugares que no te puedes perder",
+  style: TextStyle(
+    fontSize: size.width * 0.034,
+    fontWeight: FontWeight.bold,
+  ),
+),
 
       TextButton(
         onPressed: () {
@@ -435,13 +441,17 @@ Padding(
   ),
 ),
 
-const SizedBox(height: 2),
+SizedBox(
+  height: MediaQuery.of(context).size.height * 0.002,
+),
 
 /// =====================================================
 /// NOTICIAS
 const NoticiasHomeSection(),
 
-const SizedBox(height: 10),
+SizedBox(
+  height: MediaQuery.of(context).size.height * 0.015,
+),
 
               ],
               ],

@@ -179,6 +179,7 @@ class _NoticiasHomeSectionState
 
   @override
 Widget build(BuildContext context) {
+  final size = MediaQuery.of(context).size;
   if (cargando) {
     return const Center(
       child: CircularProgressIndicator(),
@@ -186,10 +187,12 @@ Widget build(BuildContext context) {
   }
 
   return SizedBox(
-    height: 120,//ALTURA DEL CARDNOTICIAS
+    height: size.height * 0.16,//ALTURA DEL CARDNOTICIAS
 
     child: ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(
+  horizontal: size.width * 0.05,
+),
       scrollDirection: Axis.horizontal,
       itemCount: noticias.length,
 
@@ -197,7 +200,7 @@ Widget build(BuildContext context) {
         final noticia = noticias[index];
 //ANCHO DEL CARD NOTICIAS
         return SizedBox(
-          width: 120,
+          width: size.width * 0.30,
           child: _cardNoticia(noticia),
         );
       },
