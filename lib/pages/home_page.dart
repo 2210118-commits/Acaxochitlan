@@ -442,7 +442,7 @@ Padding(
 ),
 
 SizedBox(
-  height: MediaQuery.of(context).size.height * 0.002,
+  height: MediaQuery.of(context).size.height * 0.001,
 ),
 
 /// =====================================================

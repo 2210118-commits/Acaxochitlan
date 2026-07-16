@@ -22,6 +22,7 @@ class _SubirImagenCarrucelPageState
   VideoPlayerController? _videoController;
 
   final ImagePicker picker = ImagePicker();
+  final TextEditingController urlController = TextEditingController();
 
   // 📸 SELECCIONAR IMAGEN
   Future<void> seleccionarImagen() async {
@@ -108,6 +109,9 @@ if (esVideo) {
 
       await SupabaseConfig.client.from('carrusel_imagenes').insert({
   'image_url': imageUrl,
+  'url_web': urlController.text.trim().isEmpty
+      ? null
+      : urlController.text.trim(),
   'creado_por': user.id,
   'activo': true,
   'orden': 0,
@@ -137,6 +141,7 @@ if (esVideo) {
   @override
   void dispose() {
     _videoController?.dispose();
+    urlController.dispose();
     super.dispose();
   }
 
@@ -147,88 +152,110 @@ if (esVideo) {
         title: const Text('Subir imagen al carrusel'),
         backgroundColor: Colors.blueAccent,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            video != null && _videoController != null
-    ? ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          height: 400,
-          width: double.infinity,
-          color: const Color.fromARGB(255, 175, 174, 174),
-          child: FittedBox(
-            fit: BoxFit.contain,
-            child: SizedBox(
-              width: _videoController!.value.size.width,
-              height: _videoController!.value.size.height,
-              child: VideoPlayer(_videoController!),
+      body: SafeArea(
+  child: SingleChildScrollView(
+    padding: EdgeInsets.fromLTRB(
+      20,
+      20,
+      20,
+      MediaQuery.of(context).viewInsets.bottom + 20,
+    ),
+    child: Column(
+      children: [
+        video != null && _videoController != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  height: 300, // antes era 400
+                  width: double.infinity,
+                  color: const Color.fromARGB(255, 175, 174, 174),
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: SizedBox(
+                      width: _videoController!.value.size.width,
+                      height: _videoController!.value.size.height,
+                      child: VideoPlayer(_videoController!),
+                    ),
+                  ),
+                ),
+              )
+            : imagen != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      imagen!,
+                      height: 300, // antes era 400
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Container(
+                    height: 300, // antes era 400
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 168, 164, 164),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Center(
+                      child: Text('No hay imagen o video seleccionado'),
+                    ),
+                  ),
+
+        const SizedBox(height: 20),
+
+        ElevatedButton.icon(
+          icon: const Icon(Icons.photo),
+          label: const Text('Seleccionar imagen'),
+          onPressed: seleccionarImagen,
+        ),
+
+        const SizedBox(height: 10),
+
+        ElevatedButton.icon(
+          icon: const Icon(Icons.videocam),
+          label: const Text('Seleccionar video'),
+          onPressed: seleccionarVideo,
+        ),
+
+        const SizedBox(height: 20),
+
+        TextField(
+          controller: urlController,
+          keyboardType: TextInputType.url,
+          decoration: InputDecoration(
+            labelText: 'URL de la página web (opcional)',
+            hintText: 'https://ejemplo.com',
+            prefixIcon: const Icon(Icons.link),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
         ),
-      )
-                : imagen != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.file(
-                          imagen!,
-                          height: 400,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : Container(
-                        height: 400,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 168, 164, 164),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Center(
-                          child: Text('No hay imagen o video seleccionado'),
-                        ),
-                      ),
 
-            const SizedBox(height: 20),
+        const SizedBox(height: 20),
 
-            ElevatedButton.icon(
-              icon: const Icon(Icons.photo),
-              label: const Text('Seleccionar imagen'),
-              onPressed: seleccionarImagen,
-            ),
-
-            const SizedBox(height: 10),
-
-            ElevatedButton.icon(
-              icon: const Icon(Icons.videocam),
-              label: const Text('Seleccionar video'),
-              onPressed: seleccionarVideo,
-            ),
-
-            const SizedBox(height: 20),
-
-            SizedBox(
-              width: double.infinity,
-              height: 45,
-              child: ElevatedButton.icon(
-                icon: subiendo
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.cloud_upload),
-                label: const Text('Subir archivo'),
-                onPressed: subiendo ? null : subirImagen,
-              ),
-            ),
-          ],
+        SizedBox(
+          width: double.infinity,
+          height: 45,
+          child: ElevatedButton.icon(
+            icon: subiendo
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.cloud_upload),
+            label: const Text('Subir archivo'),
+            onPressed: subiendo ? null : subirImagen,
+          ),
         ),
-      ),
+      ],
+    ),
+  ),
+),
     );
   }
 }

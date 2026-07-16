@@ -1,3 +1,4 @@
+//DEL CARRUCEL FUNCIONAL A 100%
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -10,6 +11,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import 'dart:io';
 import '../cache/custom_cache_manager.dart';
 import '../utils/media_optimizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CarruselSupabase extends StatefulWidget {
   final bool esAdmin;
@@ -45,21 +47,32 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
   }
 
   Future<List<Map<String, dynamic>>> obtenerImagenes() async {
-    try {
-      final res = await SupabaseConfig.client
-          .from('carrusel_imagenes')
-          .select('id, image_url, es_video')
-          .eq('activo', true)
-          .order('created_at', ascending: false);
+  try {
 
-      print("🔥 DATOS CARRUSEL: $res");
+    final existeOrden = await SupabaseConfig.client
+        .from('carrusel_imagenes')
+        .select('id')
+        .gt('orden', 0)
+        .limit(1);
 
-      return List<Map<String, dynamic>>.from(res);
-    } catch (e) {
-      debugPrint("❌ ERROR CARRUSEL: $e");
-      return [];
-    }
+    var query = SupabaseConfig.client
+        .from('carrusel_imagenes')
+        .select('id,image_url,es_video,url_web,orden')
+        .eq('activo', true);
+
+    final res = existeOrden.isEmpty
+        ? await query.order('created_at', ascending: false)
+        : await query.order('orden', ascending: true);
+
+    return List<Map<String, dynamic>>.from(res);
+
+  } catch (e) {
+
+    debugPrint(e.toString());
+
+    return [];
   }
+}
 
   Future<void> eliminarImagen(String imageUrl, String idImagen) async {
     try {
@@ -79,6 +92,112 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
     }
   }
 
+  Future<void> _cambiarOrden(
+  Map<String, dynamic> imagen,
+  List<Map<String, dynamic>> items,
+) async {
+  int? nuevaPosicion =
+    (imagen['orden'] == null || imagen['orden'] <= 0)
+        ? 1
+        : imagen['orden'];
+
+  await showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text("Cambiar posición"),
+      content: DropdownButtonFormField<int>(
+        value: nuevaPosicion,
+        decoration: const InputDecoration(
+          labelText: "Posición",
+        ),
+        items: List.generate(
+          items.length,
+          (i) => DropdownMenuItem(
+            value: i + 1,
+            child: Text("Posición ${i + 1}"),
+          ),
+        ),
+        onChanged: (value) {
+          nuevaPosicion = value;
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancelar"),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            if (nuevaPosicion == null) return;
+
+            await _guardarNuevoOrden(
+              imagen,
+              nuevaPosicion!,
+              items,
+            );
+
+            if (mounted) {
+              Navigator.pop(context);
+            }
+
+            _recargarCarrusel();
+          },
+          child: const Text("Guardar"),
+        ),
+      ],
+    ),
+  );
+}
+Future<void> _guardarNuevoOrden(
+  Map<String, dynamic> imagen,
+  int nuevaPosicion,
+  List<Map<String, dynamic>> items,
+) async {
+
+  final lista = [...items];
+
+  lista.sort((a,b){
+
+    final oa = (a['orden'] ?? 0) as int;
+    final ob = (b['orden'] ?? 0) as int;
+
+    return oa.compareTo(ob);
+
+  });
+
+  final actual =
+      lista.indexWhere((e)=>e['id']==imagen['id']);
+
+  if(actual==-1) return;
+
+  final item = lista.removeAt(actual);
+
+  lista.insert(nuevaPosicion-1,item);
+
+  for(int i=0;i<lista.length;i++){
+
+    lista[i]['orden']=i+1;
+
+  }
+
+  await Future.wait(
+
+    lista.map((e){
+
+      return SupabaseConfig.client
+          .from('carrusel_imagenes')
+          .update({
+            'orden':e['orden']
+          })
+          .eq('id',e['id']);
+
+    }),
+
+  );
+
+  _recargarCarrusel();
+
+}
   // 🖼️ FULLSCREEN IMAGEN
   void _verImagenFullscreen(BuildContext context, String imageUrl) {
     Navigator.push(
@@ -197,80 +316,156 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
                               },
                             )
                           : GestureDetector(
-                              onTap: () => _verImagenFullscreen(
-                                context,
-                                imageUrl,
-                              ),
-                              child: CachedNetworkImage(
-                                cacheManager: CustomCacheManager.instance,
-                                imageUrl: imageUrl,
-                                height: alturaCarrusel,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                fadeInDuration:
-                                    const Duration(milliseconds: 700),
-                                fadeOutDuration:
-                                    const Duration(milliseconds: 300),
-                                placeholder: (context, url) => Container(
-                                  color: Colors.black12,
-                                  child: const Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                ),
-                                errorWidget: (_, __, ___) => const Icon(
-                                  Icons.broken_image,
-                                ),
-                                memCacheWidth: 700,
-                                memCacheHeight: 350,
-                              ),
-                            ),
+    onTap: () => _verImagenFullscreen(
+      context,
+      imageUrl,
+    ),
+    child: Stack(
+  fit: StackFit.expand,
+  children: [
+
+    /// Fondo del mismo color de la interfaz
+    Container(
+      color: const Color(0xFFF5F2F7), // cambia este color por el de tu tema
+    ),
+
+    /// Imagen
+    Center(
+      child: CachedNetworkImage(
+  cacheManager: CustomCacheManager.instance,
+  imageUrl: imageUrl,
+  fit: BoxFit.fitWidth,
+  width: double.infinity,
+  height: double.infinity,
+)
+    ),
+  ],
+)
+  ),
                     ),
+
+                    if (img['url_web'] != null &&
+    img['url_web'].toString().trim().isNotEmpty)
+  Positioned(
+    bottom: 10,
+    left: 0,
+    right: 0,
+    child: Center(
+      child: SizedBox(
+  width: 130, // ancho
+  height: 30, // alto
+  child: ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF8D081A),
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+    onPressed: () async {
+      await launchUrl(
+        Uri.parse(img['url_web']),
+        mode: LaunchMode.externalApplication,
+      );
+    },
+    child: const Text("Más detalles"),
+  ),
+)
+    ),
+  ),
 
                     // ❌ BOTÓN ELIMINAR (SOLO ADMIN)
                     if (widget.esAdmin)
-                      Positioned(
-                        top: 2,
-                        right: 2,
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                            size: 28,
-                          ),
-                          onPressed: () async {
-                            final confirm = await showDialog<bool>(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                title: const Text('Eliminar archivo'),
-                                content: const Text(
-                                  '¿Deseas eliminar este archivo permanentemente?',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
-                                    child: const Text('Cancelar'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
-                                    child: const Text('Eliminar'),
-                                  ),
-                                ],
-                              ),
-                            );
+  Positioned(
+    top: 2,
+    right: 2,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
 
-                            if (confirm == true) {
-                              await eliminarImagen(
-                                imageUrl,
-                                idImagen,
-                              );
-                            }
-                          },
-                        ),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(137, 148, 148, 148),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: IconButton(
+            icon: const Icon(
+              Icons.format_list_numbered,
+              color: Colors.orange,
+            ),
+            tooltip: "Cambiar orden",
+            onPressed: () {
+              _cambiarOrden(
+                img,
+                items,
+              );
+            },
+          ),
+        ),
+
+        const SizedBox(width: 4),
+
+        Container(
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(137, 146, 146, 146),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: IconButton(
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+            tooltip: "Eliminar",
+            onPressed: () async {
+
+              final confirm =
+                  await showDialog<bool>(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text(
+                    'Eliminar archivo',
+                  ),
+                  content: const Text(
+                    '¿Deseas eliminar este archivo permanentemente?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () =>
+                          Navigator.pop(
+                        context,
+                        false,
                       ),
+                      child: const Text(
+                        'Cancelar',
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () =>
+                          Navigator.pop(
+                        context,
+                        true,
+                      ),
+                      child: const Text(
+                        'Eliminar',
+                      ),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+
+                await eliminarImagen(
+                  imageUrl,
+                  idImagen,
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    ),
+  ),
                   ],
                 );
               }).toList(),
@@ -284,8 +479,8 @@ class _CarruselSupabaseState extends State<CarruselSupabase> {
                     entry.key,
                   ),
                   child: Container(
-                    width: _currentIndex == entry.key ? 10 : 8,
-                    height: _currentIndex == entry.key ? 10 : 8,
+                    width: _currentIndex == entry.key ? 8 : 6,
+                    height: _currentIndex == entry.key ? 8 : 6,
                     margin: const EdgeInsets.symmetric(
                       horizontal: 3,
                     ),
